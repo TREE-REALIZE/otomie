@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オトミエ</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/destyle.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- スプラッシュ画面 -->
+    <div id="SplashWindow" class="Window">
+        <div id="BrandGrp" class="FadeOutBrand">
+            <img src="images/Realize.png" alt="" id="RealizeImage">
+            <img src="images/Tree.png" alt="" id="TreeImage">
+        </div>
+        <div id="AppLogoGrp" class="FadeOutAppLogo">
+            <img src="images/AppLogo.png" alt="" id="AppLogoImage">
+            <div id="SplashAppText">オトミエ</div>
+            <div id="VersionText">Ver.β</div>
+        </div>
+    </div>
+    
+    <!-- ハウトゥ画面 -->
+    <div id="HowToWindow" class="Window">
+        <div class="Slider">
+            <!-- SliderContent:スライドする役目 -->
+            <div class="SliderContent Window">
+                <div id="ConceptCard" class="RoundFrame">
+                    <div id="ConceptTitleText">オトミエ</div>
+                    <img src="images/Concept.png" alt="" id="ConceptImage">
+                    <div id="ConceptText">おとがえになるよ<br><br>使い方のイメージ<br>コンセプト文言</div>
+                    <div id="ConceptNext">タップしてつぎへ</div>
+                </div>
+            </div>
+            <div class="SliderContent Window">
+                <div id="MicOnCard" class="RoundFrame">
+                    <div id="MicOnTitleText">マイクの設定</div>
+                    <img src="images/MicOn.png" alt="" id="MicOnImage">
+                    <div id="MicOnText">ボタンを押して<br>マイクをオンにしてね<br><br>音周りの設定<br>収録開始文言</div>
+                    <div id="MicOnNext">マイクをオン</div>
+                </div>
+            </div>
+            <div class="SliderContent Window">
+                <div id="StartCard" class="RoundFrame">
+                    <div id="StartTitleText">はじめましょう</div>
+                    <img src="images/AppLogo.png" alt="" id="StartImage">
+                    <div id="StartText">マイクがオンになって<br>いることを確認</div>
+                    <div id="StartNext">タップしてはじめる</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 収録準備画面 -->
+    <div id="RecWindow" class="Window">
+        <div id="CanvasRealTime"></div>
+        <div id="CanvasWaveFormRec"></div>
+        <div id="RecTimeGauge">
+            <div id="ButtonStartRec">
+            </div>
+        </div>
+    </div>
+
+    <!-- 再生中画面 -->
+    <div id="PlayWindow" class="Window">
+        <!-- ↓クラスの付け替えで状態(RecPlayer RecIcon)切り替え -->
+        <div id="RecContainer" class="RecPlayer">
+            <div id="RecTitle">Title</div>
+            <div id="CanvasRecMovie"></div>
+            <div id="CanvasWaveFormPlay"></div>
+            <div id="RecLocation">場所：港区南麻布三丁目</div>
+            <div id="ButtonBackToRecWindow"></div>
+            <div id="ButtonDeleteMovie"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

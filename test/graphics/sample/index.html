@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>音声解析</title>
+    <link rel="preload" href="" as="">
+    <script src="soundData.js"></script>
+    <script src="animation.js"></script>
+</head>
+
+<body>
+    <div>
+        <input id="file1" type="file" onChange="fileChanged(this)" multiple>
+    </div>
+
+    <div id="ButtonOpenMovie">
+        <button type="button" name="ButtonOpenMovie">再生</button>
+    </div>
+    <div id="realTimeGraphs">
+        描画キャンバス<br>
+        <canvas id="canvasGraphics" width="340" height="340"></canvas><br>
+    </div>
+
+    <div id="realTimeGraphs">
+        スペクトル描画キャンバス<br>
+        <canvas id="canvasFrequency" width="340" height="340"></canvas><br>
+    </div>
+
+    <div id="realTimeGraphs">
+        タイムライン<br>
+        <canvas id="canvasTimeLine"></canvas><br>
+    </div>
+</body>
+</html>

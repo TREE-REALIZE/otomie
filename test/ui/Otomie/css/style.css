@@ -1,0 +1,563 @@
+@charset "UTF-8";
+
+/* 位置、組み、サイズ、形、線、色 */
+
+
+body {
+    margin: 0;
+    /* あとで消す */
+    background-color: rgb(204, 204, 204);
+}
+
+/* すべての画面共通の外枠 */
+.Window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+
+    /* あとで消す */
+    width: 428px;
+    height: 926px;
+    /* margin: 10px; */
+}
+
+/* 丸型の共通の枠 */
+.RoundFrame {
+    position: absolute;
+    width: 398px;
+    height: 896px;
+    top: 15px;
+    left: 15px;
+    border-radius: 20px;
+    background-color: rgb(238, 255, 203);
+    box-shadow: 0px 6px 12px 0px rgb(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+
+/* 録画した動画を小さくする枠 */
+.MiniFrame {
+    position: absolute;
+    width: 398px;
+    height: 896px;
+    top: 15px;
+    left: 15px;
+    border-radius: 50px;
+    background-color: rgb(255, 235, 168);
+    box-shadow: 0px 6px 12px 0px rgb(0, 0, 0, 0.5);
+}
+
+/* 一瞬で非表示にする用クラス */
+/* .Collapse {
+    visibility: collapse;
+} */
+/*-- 非表示用クラス --*/
+.Displaynone {
+    display: none;
+}
+
+/* ----------------------各画面---------------------- */
+/*-------- スプラッシュ画面 --------*/
+#SplashWindow {
+    /* background-color: coral; */
+    text-align: center;
+    /* z-index: 100; */
+}
+#RealizeImage {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 300px;
+    height: 170px;
+}
+#TreeImage {
+    position: absolute;
+    bottom: 30px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 140px;
+    height: 50px;
+}
+#AppLogoImage {
+    position: absolute;
+    top: 330px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 130px;
+    height: 130px;
+}
+#SplashAppText {
+    position: absolute;
+    top: 500px;
+    left: 57px;
+    margin: 0 auto 0 auto;
+    height: 100px;
+    width: 300px;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-size: 40px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+}
+#VersionText {
+    position: absolute;
+    bottom: 3px;
+    left: 57px;
+    margin: 0 auto 0 auto;
+    height: 50px;
+    width: 300px;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+}
+/* .FadeOut {
+    animation-name: fadeOutSplash;
+    animation-duration: 2s;
+    animation-timing-function: 1s;
+    animation-delay: 1s;
+    animation-fill-mode: forwards;
+} */
+.FadeOutBrand {
+    animation-name: fadeOutBrand;
+    animation-duration: 3s; 
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+}
+@keyframes fadeOutBrand{
+    0%, 50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        visibility: collapse;
+    }
+  }
+.FadeOutAppLogo {
+    animation-name: fadeOutAppLogo;
+    animation-duration: 6s; 
+    animation-timing-function: ease;
+    /* animation-delay: 2s; */
+    animation-fill-mode: forwards;
+}
+@keyframes fadeOutAppLogo{
+    0%, 45% {
+        opacity: 0;
+    }
+    55% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        visibility: collapse;
+    }
+  }
+
+/*-------- ハウトゥ画面 --------*/
+#HowToWindow {
+    /* text-align: center; */
+}
+.Slider {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.SliderContent {
+    min-width: 100%;
+}
+#ConceptTitleText, #MicOnTitleText, #StartTitleText {
+    position: absolute;
+    top: 150px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 398px;
+    height: 170px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 200;
+    font-size: 33px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+    z-index: 10;
+}
+#ConceptImage, #MicOnImage, #StartImage {
+    position: absolute;
+    top: 270px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 200px;
+    height: 200px;
+    text-align: center;
+    z-index: 10;
+}
+#ConceptText, #MicOnText, #StartText {
+    position: absolute;
+    top: 500px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 398px;
+    height: 170px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 200;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+    z-index: 10;
+}
+#ConceptNext, #MicOnNext, #StartNext {
+    position: absolute;
+    bottom: 20px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 398px;
+    height: 170px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 300;
+    font-size: 25px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+    z-index: 10;
+}
+/* Howto画面のアニメーション */
+.SlideHowtoAnim01 {
+    animation-name: slideHowtoAnim01;
+    animation-duration: 1s; 
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+}
+@keyframes slideHowtoAnim01 {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.SlideHowtoAnim02 {
+    animation-name: slideHowtoAnim02;
+    animation-duration: 1s; 
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+}
+@keyframes slideHowtoAnim02 {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(-200%);
+    }
+}
+
+/*-- 収録準備画面 --*/
+#RecWindow {
+    background-color: rgb(221, 242, 255);
+    text-align: center;
+}
+#CanvasRealTime {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:  130px auto auto auto;
+    width: 340px;
+    height: 340px;
+    border-radius: 30px;
+    background-color: rgb(190, 190, 255);
+}
+#CanvasWaveFormRec {
+    position: absolute;
+    bottom: 300px;
+    width: 100%;
+    height: 100px;
+    background-color: rgb(255, 136, 136);
+}
+/* 録画ボタン引っ込むアニメ */
+.DownRecBtnAnim {
+    animation-name: downRecBtnAnim;
+    animation-duration: 1s; 
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+}
+@keyframes downRecBtnAnim {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(50%);
+    }
+}
+/* 録画ボタン現れるアニメ */
+.UpRecBtnAnim {
+    animation-name: upRecBtnAnim;
+    animation-duration: 1s; 
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+}
+@keyframes upRecBtnAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(50%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* 録画ボタンとゲージ */
+#RecTimeGauge {
+    position: absolute;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 90px;
+    height: 90px;
+    background: rgb(255, 40, 40); /* 完了したときの色 */
+    border-radius: 50%;
+    text-align: center;
+    overflow: hidden;
+    z-index: 1;
+}
+#RecTimeGauge::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 171, 171);
+    transform-origin: right 50%;
+    z-index: 2;
+    /* ↓あとで移行して消す */
+    animation: rotate-circle-left 5s linear forwards;
+}
+#RecTimeGauge::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 171, 171);
+    transform-origin: left 50%;
+    z-index: 3;
+    /* ↓あとで移行して消す */
+    animation: rotate-circle-right 5s linear forwards;
+}
+#ButtonStartRec {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    margin: auto;
+    width: 76px;
+    height: 76px;
+    background-color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 4;
+}
+/* ゲージ回すアニメ */
+.RotateCircleLeft {
+    animation: rotate-circle-left 5s linear forwards;
+}
+.RotateCircleRight {
+    animation: rotate-circle-right 5s linear forwards;
+}
+@keyframes rotate-circle-right {
+    0%   {
+        transform: rotate(0deg);
+        background: rgb(255, 171, 171);
+    }
+    50%  {
+        transform: rotate(180deg);
+        background: rgb(255, 171, 171);
+    }
+    50.01% {
+        transform: rotate(360deg);
+        background: rgb(255, 40, 40);
+    }
+    100% {
+        transform: rotate(360deg);
+        background: rgb(255, 40, 40);
+    }
+}
+@keyframes rotate-circle-left {
+    0%   { transform: rotate(0deg); }
+    50%  { transform: rotate(0deg); }
+    100% { transform: rotate(180deg); }
+}
+/* 再生ボタン */
+/* #ButtonStartRec::before {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    transform: translateY(-50%);
+    width: 0px;
+    height: 0px;
+    border: 25px solid transparent;
+    border-left: 40px solid currentColor;
+    box-sizing: border-box;
+    content: "";
+} */
+/* 停止ボタン */
+#ButtonStartRec::before,
+#ButtonStartRec::after {
+    position: absolute;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 10px;
+    height: 45px;
+    box-sizing: border-box;
+    background-color: rgb(255, 40, 40);
+    content: "";
+}
+#ButtonStartRec::before {
+    left: 35%;
+}
+#ButtonStartRec::after {
+    left: 65%;
+}
+
+
+/*------------- 再生中画面 -----------*/
+#PlayWindow {
+    /* background-color: rgb(221, 242, 255); */
+    text-align: center;
+}
+/* -----プレイヤー状態------ */
+#RecContainer.RecPlayer {
+    position: absolute;
+    width: 398px;
+    height: 896px;
+    top: 15px;
+    left: 15px;
+    border-radius: 50px;
+    background-color: rgb(255, 236, 175);
+    box-shadow: 0px 6px 12px 0px rgb(0, 0, 0, 0.5);
+}
+#RecContainer.RecPlayer #RecTitle {
+    position: absolute;
+    top: 50px;
+    left: 57px;
+    margin: 0 auto 0 auto;
+    height: 100px;
+    width: 300px;
+    border-radius: 30px;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-size: 40px;
+    letter-spacing: 0.12em;
+    color: rgb(0, 0, 0);
+}
+#RecContainer.RecPlayer #CanvasRecMovie {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:  130px auto auto auto;
+    width: 340px;
+    height: 340px;
+    border-radius: 30px;
+    background-color: rgb(162, 255, 193);
+}
+#RecContainer.RecPlayer #CanvasWaveFormPlay {
+    position: absolute;
+    bottom: 300px;
+    width: 100%;
+    height: 100px;
+    background-color: rgb(255, 136, 136);
+}
+#RecContainer.RecPlayer #RecLocation {
+    position: absolute;
+    bottom: 150px;
+    left: 97px;
+    margin: 0 auto 0 auto;
+    padding: 30px auto auto auto;
+    height: 40px;
+    width: 220px;
+    background-color: rgb(131, 131, 131);
+    border-radius: 20px;
+    line-height: 40px;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-size: 15px;
+    letter-spacing: 0em;
+    color: rgb(255, 255, 255);
+}
+#RecContainer.RecPlayer #ButtonBackToRecWindow {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(65, 71, 75);
+}
+#RecContainer.RecPlayer #ButtonDeleteMovie {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    width: 80px;
+    height:80px;
+    border-radius: 50%;
+    background-color: rgba(65, 71, 75);
+}
+
+/* ------------アイコン状態---------- */
+#RecContainer.RecIcon #RecTitle {
+    display: none;
+}
+#RecContainer.RecIcon #CanvasRecMovie {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 30px;
+    background-color: rgb(162, 255, 193);
+}
+#RecContainer.RecIcon #CanvasWaveFormPlay {
+    display: none;
+}
+#RecContainer.RecIcon #RecLocation {
+    display: none;
+}
+#RecContainer.RecIcon #ButtonBackToRecWindow {
+    display: none;
+}
+#RecContainer.RecIcon #ButtonDeleteMovie {
+    display: none;
+}
+
+
+/* transformテスト */
+.transform {
+    transform: scale(2, 2) translate(-50%, -50%);
+
+}
