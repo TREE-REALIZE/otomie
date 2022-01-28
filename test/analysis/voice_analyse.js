@@ -19,6 +19,8 @@ let bufferData = new Float32Array(bufferSize);  //音源データ用バッファ
 
 let audioData = [];                             //バッファデータをPushしていくオブジェクト
 let spectrums;                                  //周波数ごとのデータを保存する配列
+let spectrumPeak;                               //周波数のピークの値
+let N_spectrumPeak                              //周波数のピークの値(正規化)
 let timeDomainArray;                            //時間領域ごとのデータを保存する配列
 let audioDeltaTime;                             //オーディオ処理ごとのデルタタイム用変数
 
@@ -197,6 +199,7 @@ const onAudioProcess = (e) => {
     let input = e.inputBuffer.getChannelData(0);    //PCMデータ：信号の強度が格納されている.
     bufferData = new Float32Array(input);
 
+    console.log("maxDecibels" + audioAnalyser.maxDecibels);
     //オーディオデータにバッファデータを積んでいく
     audioData.push(bufferData);
 
@@ -207,9 +210,9 @@ const onAudioProcess = (e) => {
     analyseVoice();
 };
 
-const calcAudioDeltaTime = ()=>{
+const calcAudioDeltaTime = () => {
     audioDeltaTime = audioContext.currentTime - audioLastTime;
-    audioLastTime = audioContext.currentTime;    
+    audioLastTime = audioContext.currentTime;
 }
 
 const createJsonDataFormat = () => {
@@ -252,6 +255,10 @@ const createFrameDataObj = () => {
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
     raw.frequency = Object.values(spectrums);
+    raw.pitch = spectrumPeak;
+    
+    visual = {};
+    visual.pitch = N_spectrumPeak;
 
     frameData.raw = raw;
     frameData.visual = visual;
@@ -302,10 +309,12 @@ const analyseVoice = () => {
 
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
+    let dataIndex = data["dataList"].length - 1;
+    calcFrequencyPeak(data, dataIndex);
     createFrameDataObj();
+
     console.log("data[dataList].length-1" + (data["dataList"].length - 1));
 
-    let dataIndex = data["dataList"].length - 1;
     drawSpectCanvas(data, dataIndex, canvasFrequency);
     drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
     drawSpectrogram(data, dataIndex, canvasSpectrogram);
@@ -325,10 +334,7 @@ const animateCanvases = () => {
             audioTime = data["dataList"][dataIndex].deltaTime;
         }
 
-        
-        drawSpectCanvas(data, dataIndex, A_canvasFrequency);
-        drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
-        drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
+
 
         drawTime = (performance.now() / 1000) - startTime;
 
@@ -347,6 +353,11 @@ const animateCanvases = () => {
                 }
             }
             dataIndex = processIndex;
+
+            drawSpectCanvas(data, dataIndex, A_canvasFrequency);
+            drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
+            drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
+
             dataIndex += 1;
 
             //ループする条件
@@ -480,6 +491,19 @@ const drawSpectrogram = (_data, _index, _canvas) => {
             targetCanvasContext.fillRect(targetCanvas.width - 1, targetCanvas.height - 1 - i, 1, 1);
         }
     }
+}
+
+const calcFrequencyPeak = (_data, _index) => {
+    let rawData = _data["dataList"][_index]["raw"];
+    let requencyList = rawData["frequency"];
+    let spectrumPeakIndex = requencyList.indexOf(Math.max(...requencyList));
+    console.log("spectrumPedata[dataList]length" + data["dataList"].length);
+    console.log("spectrumPeakIndex" + spectrumPeakIndex);
+    spectrumPeak = fsDivN * spectrumPeakIndex;
+    N_spectrumPeak = spectrumPeak / (audioContext.sampleRate/2);
+    console.log("spectrumPeak" + spectrumPeak + "Hz");
+    console.log("NspectrumPeak" + N_spectrumPeak + "Hz");
+    //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
 }
 
 
