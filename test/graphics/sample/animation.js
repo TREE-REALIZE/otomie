@@ -1,18 +1,23 @@
+let otomieVisual;
+
+
 // □■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■
 /**
  * グラフィックの描画処理を行う関数．のちにこの関数をモジュール化する方針．
  * 
  * @param {*} _data 音全体のデータ．　
  * @param {*} _index 対象データのインデックス
- * @param {*} _canvas 描画対象キャンバス
+ * @param {*} _container 描画対象キャンバスが入るDiv
  */
-const drawCanvas = (_data, _index, _canvas) => {
+const drawCanvas = (_data, _index, _container) => {
 
     //1回の描画に必要なデータを取得する
     let frameData = _data["dataList"][_index];
 
     //グラフィック記述部分
     //-------------------------------------------------------
+    const {deltaTime, visual} = frameData;
+    otomieVisual.render(deltaTime*100, visual)
 }
 
 
@@ -36,8 +41,10 @@ const drawCanvas = (_data, _index, _canvas) => {
     //ページが読まれたときの処理
     window.addEventListener("load", () => {
         canvasFrequency = document.querySelector('#canvasFrequency');
-        canvasGraphics = document.querySelector('#canvasGraphics');
+        containerGraphics = document.querySelector('#containerGraphics');
         document.querySelector('[name=ButtonOpenMovie]').addEventListener("click", playDataList);
+        otomieVisual = new OtomieVisual.OtomieVisual();
+        otomieVisual.init(containerGraphics, 170, 170);
         console.log(data);
     });
 
@@ -103,7 +110,7 @@ const drawCanvas = (_data, _index, _canvas) => {
             }
             
             drawSpectCanvas(data, dataIndex, canvasFrequency);
-            drawCanvas(data, dataIndex, canvasGraphics);
+            drawCanvas(data, dataIndex, containerGraphics);
 
             drawTime = (performance.now() / 1000) - startTime;
             
