@@ -20,7 +20,9 @@ let bufferData = new Float32Array(bufferSize);  //音源データ用バッファ
 let audioData = [];                             //バッファデータをPushしていくオブジェクト
 let spectrums;                                  //周波数ごとのデータを保存する配列
 let spectrumPeak;                               //周波数のピークの値
-let N_spectrumPeak                              //周波数のピークの値(正規化)
+let N_spectrumPeak;                             //周波数のピークの値(正規化)
+let volume;                               //周波数のピークの値
+let N_volume;                              //周波数のピークの値(正規化)
 let timeDomainArray;                            //時間領域ごとのデータを保存する配列
 let audioDeltaTime;                             //オーディオ処理ごとのデルタタイム用変数
 
@@ -28,6 +30,7 @@ let audioDeltaTime;                             //オーディオ処理ごとの
 let isCollecting = false;                       //収音中
 let isRecording = false;                        //収録中
 let isPlaying = false;                          //再生中
+
 
 //キャンバス要カラーマップ作製
 const colorMap = generateColorMap({ r: 0, g: 0, b: 255 }, { r: 0, g: 255, b: 0 });
@@ -169,8 +172,9 @@ const archiveData = (_data) => {
 
 //受けとったJsonデータをオブジェクトにへんかんする．
 const decordeJsonDataList = (jsonData) => {
+    console.log("jsonData" + jsonData);
     playingData = JSON.parse(jsonData);
-    console.log("playingData[time]: " + playingData["time"]);
+    //console.log("playingData[time]: " + playingData["time"]);
 }
 
 
@@ -256,13 +260,15 @@ const createFrameDataObj = () => {
     raw = {};
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
-    console.log("raw.timeDomain" + raw.timeDomain);
+    //console.log("raw.timeDomain" + raw.timeDomain);
 
     raw.frequency = Object.values(spectrums);
     raw.pitch = spectrumPeak;
+    raw.volume = volume;
 
     visual = {};
     visual.pitch = N_spectrumPeak;
+    visual.volume = N_volume;
 
     frameData.raw = raw;
     frameData.visual = visual;
@@ -313,15 +319,16 @@ const analyseVoice = () => {
 
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
+    createFrameDataObj();
+
     let dataIndex = data["dataList"].length - 1;
     calcFrequencyPeak(data, dataIndex);
-    createFrameDataObj();
 
     console.log("data[dataList].length-1" + (data["dataList"].length - 1));
 
-    drawRectangle(data, dataIndex, canvasTimeline);
     drawSpectCanvas(data, dataIndex, canvasFrequency);
     drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
+    drawRectangle(data, dataIndex, canvasTimeline);
     drawSpectrogram(data, dataIndex, canvasSpectrogram);
 
 }
@@ -507,38 +514,29 @@ const calcFrequencyPeak = (_data, _index) => {
     spectrumPeak = fsDivN * spectrumPeakIndex;
     N_spectrumPeak = spectrumPeak / (audioContext.sampleRate / 2);
     console.log("spectrumPeak" + spectrumPeak + "Hz");
-    console.log("NspectrumPeak" + N_spectrumPeak + "Hz");
+    console.log("NspectrumPeakLength" + N_spectrumPeak.length);
     //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
 }
 
 
 
-const getDBPeak = (_dataList, _index) => {
-
-
+const getDBPeak = (_dataList) => {
     let peak = -100;
     for (let i = 0, len = _dataList.length; i < len; i++) {
         const sample = _dataList[i];
         if (sample > peak) {
             peak = sample;
+            volume = peak;
+            N_volume = peak/255;
         }
     }
     return peak;
-
-    // console.log("spectrumPedata[dataList]length" + data["dataList"].length);
-    // console.log("spectrumPeakIndex" + spectrumPeakIndex);
-    // spectrumPeak = fsDivN * spectrumPeakIndex;
-    // N_spectrumPeak = spectrumPeak / (audioContext.sampleRate / 2);
-
-    //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
 }
 
 const bars = [];
 const drawRectangle = (_data, _index, _canvas) => {
-
     const ctx = _canvas.getContext('2d');
     ctx.clearRect(0, 0, _canvas.width, _canvas.height);
-
     ctx.beginPath();
 
     let rawData = _data["dataList"][_index]["raw"];
@@ -549,41 +547,59 @@ const drawRectangle = (_data, _index, _canvas) => {
     //let x = canvas.width / dataList.length;
     let barHeight = (1 - (peak / 255)) * _canvas.height;
     ctx.fillStyle = 'rgb(0, 0, 0)';
-    
+
     //ctx.fillRect(_canvas.width / 2, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight));
-    pushBar(_canvas.width,_canvas.height / 2,barWidth,-((_canvas.height / 2) - barHeight));
-    pushBar(_canvas.width,_canvas.height / 2,barWidth,((_canvas.height / 2) - barHeight));
-    
+
+    let color = 'rgb(0, 0, 0)';
+    if (isRecording) {
+        color = 'rgb(0, 255, 0)';
+    } else {
+        color = 'rgb(0, 0, 0)';
+    }
+
+    let velocity = 1;
+
+    console.log(color);
+    pushBar(_canvas.width, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight), velocity, color);
+    pushBar(_canvas.width, _canvas.height / 2, barWidth, ((_canvas.height / 2) - barHeight), velocity, color);
+
     bars.forEach((element) => element.move());
     bars.forEach((element) => element.render(ctx));
-
+    bars.forEach((element) => {
+        if (element.x < 0 - barWidth) {
+            bars.shift();
+        }
+    });
+    console.log("bars.length :   " + bars.length);
     console.log("y : " + barHeight);
 }
 
 
 
-const pushBar = (x,y,w,h) => {
-    bars.push(new Rectangle(x,y,w,h));    
+const pushBar = (x, y, w, h, velocity, color) => {
+    bars.push(new Rectangle(x, y, w, h, velocity, color));
 }
 
 
 class Rectangle {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height, velocity, color) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-
-        this.velocityX = 2; // この速度で横に移動する。
+        this.velocityX = velocity; // この速度で横に移動する。]
+        this.color = color;
     }
 
-    move() {        
+    move() {
         this.x -= this.velocityX;
     }
 
     render(context) {
         context.beginPath();
-        context.fillStyle = 'rgb(0, 0, 0)'; // 青色
+        context.fillStyle = this.color; // 青色
+
+        //context.fillStyle = 'rgb(0, 0, 0)'; // 青色
         context.rect(this.x, this.y, this.width, this.height);
         context.fill();
     }
