@@ -34,6 +34,8 @@ const colorMap = generateColorMap({ r: 0, g: 0, b: 255 }, { r: 0, g: 255, b: 0 }
 
 // キャンバス
 //リアルタイム描画側
+let canvasTimeline = document.querySelector('#canvasTimeline');
+
 let canvasFrequency = document.querySelector('#canvasFrequency');
 
 let canvasTimeDomain = document.querySelector('#canvasTimeDomain');
@@ -254,9 +256,11 @@ const createFrameDataObj = () => {
     raw = {};
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
+    console.log("raw.timeDomain" + raw.timeDomain);
+
     raw.frequency = Object.values(spectrums);
     raw.pitch = spectrumPeak;
-    
+
     visual = {};
     visual.pitch = N_spectrumPeak;
 
@@ -315,6 +319,7 @@ const analyseVoice = () => {
 
     console.log("data[dataList].length-1" + (data["dataList"].length - 1));
 
+    drawRectangle(data, dataIndex, canvasTimeline);
     drawSpectCanvas(data, dataIndex, canvasFrequency);
     drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
     drawSpectrogram(data, dataIndex, canvasSpectrogram);
@@ -500,10 +505,88 @@ const calcFrequencyPeak = (_data, _index) => {
     console.log("spectrumPedata[dataList]length" + data["dataList"].length);
     console.log("spectrumPeakIndex" + spectrumPeakIndex);
     spectrumPeak = fsDivN * spectrumPeakIndex;
-    N_spectrumPeak = spectrumPeak / (audioContext.sampleRate/2);
+    N_spectrumPeak = spectrumPeak / (audioContext.sampleRate / 2);
     console.log("spectrumPeak" + spectrumPeak + "Hz");
     console.log("NspectrumPeak" + N_spectrumPeak + "Hz");
     //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
+}
+
+
+
+const getDBPeak = (_dataList, _index) => {
+
+
+    let peak = -100;
+    for (let i = 0, len = _dataList.length; i < len; i++) {
+        const sample = _dataList[i];
+        if (sample > peak) {
+            peak = sample;
+        }
+    }
+    return peak;
+
+    // console.log("spectrumPedata[dataList]length" + data["dataList"].length);
+    // console.log("spectrumPeakIndex" + spectrumPeakIndex);
+    // spectrumPeak = fsDivN * spectrumPeakIndex;
+    // N_spectrumPeak = spectrumPeak / (audioContext.sampleRate / 2);
+
+    //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
+}
+
+const bars = [];
+const drawRectangle = (_data, _index, _canvas) => {
+
+    const ctx = _canvas.getContext('2d');
+    ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+
+    ctx.beginPath();
+
+    let rawData = _data["dataList"][_index]["raw"];
+    let timeDomainList = rawData["timeDomain"];
+    let peak = getDBPeak(timeDomainList);
+
+    let barWidth = 2;
+    //let x = canvas.width / dataList.length;
+    let barHeight = (1 - (peak / 255)) * _canvas.height;
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    
+    //ctx.fillRect(_canvas.width / 2, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight));
+    pushBar(_canvas.width,_canvas.height / 2,barWidth,-((_canvas.height / 2) - barHeight));
+    pushBar(_canvas.width,_canvas.height / 2,barWidth,((_canvas.height / 2) - barHeight));
+    
+    bars.forEach((element) => element.move());
+    bars.forEach((element) => element.render(ctx));
+
+    console.log("y : " + barHeight);
+}
+
+
+
+const pushBar = (x,y,w,h) => {
+    bars.push(new Rectangle(x,y,w,h));    
+}
+
+
+class Rectangle {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.velocityX = 2; // この速度で横に移動する。
+    }
+
+    move() {        
+        this.x -= this.velocityX;
+    }
+
+    render(context) {
+        context.beginPath();
+        context.fillStyle = 'rgb(0, 0, 0)'; // 青色
+        context.rect(this.x, this.y, this.width, this.height);
+        context.fill();
+    }
 }
 
 
