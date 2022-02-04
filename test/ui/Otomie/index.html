@@ -58,27 +58,49 @@
 
     <!-- 収録準備画面 -->
     <div id="RecWindow" class="Window">
+        <div id="StatusBarRec"></div>
+        <div id="TitleLogoRec"></div>
         <div id="CanvasRealTime"></div>
         <div id="CanvasWaveFormRec"></div>
-        <div id="RecTimeGauge">
-            <div id="ButtonStartRec">
+        <div id="RecBottomCover">
+            <div id="ButtonStartRecBack">
+                 <!-- ↓クラスの付け替えで状態(NormalRecBtn StartRecBtn)切り替え -->
+                <div id="ButtonStartRec" class="NormalRecBtn">
+                    <div id="RecCountTextBack">
+                        <div id="RecCountText"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- 再生中画面 -->
     <div id="PlayWindow" class="Window">
-        <!-- ↓クラスの付け替えで状態(RecPlayer RecIcon)切り替え -->
+        <!-- ↓クラスの付け替えで状態(RecFinish RecIcon RecPlayer)切り替え -->
         <div id="RecContainer" class="RecPlayer">
-            <div id="RecTitle">Title</div>
-            <div id="CanvasRecMovie"></div>
-            <div id="CanvasWaveFormPlay"></div>
-            <div id="RecLocation">場所：港区南麻布三丁目</div>
-            <div id="ButtonBackToRecWindow"></div>
-            <div id="ButtonDeleteMovie"></div>
+            <div id="WhiteFadePanel">
+                <div id="CanvasRecMovie"></div>
+                <div id="CanvasWaveFormPlay"></div>
+                <div id="RecDateTime"><img src="images/TimeIcon.png"></i> 2022年12月22日 12:35</div>
+                <div id="RecLocation"><img src="images/LocationIcon.png"></i> 港区南麻布三丁目</div>        
+                <div id="PlayBottomCover">
+                    <div id="ButtonStartPlayBack">
+                        <!-- 再生/停止ボタン -->
+                        <div id="ButtonStartPlay" class="NormalPlayBtn"></div>
+                    </div>
+                    <div id="ButtonBackToRecWindow"><i class="fa fa-arrow-left"></i></div>
+                    <div id="ButtonDeleteMovie"><i class="fa fa-ellipsis-v"></i></div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div>
+        <div id="TitleLogo"></div>
+        <div id="StatusBar"></div>
+        
+    </div>
+    <script src="app.js"></script>
     <script src="script.js"></script>
 </body>
 
