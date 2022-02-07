@@ -90,13 +90,24 @@ let visual = {               //ビジュアル用に正規化
 };
 
 window.addEventListener("load", () => {
-    document.querySelector("#TitleWindow").addEventListener("click", startCollecting);
-    document.querySelector('[name=ButtonOpenMovie]').addEventListener("click", playDataList);
+    document.querySelector("#TitleWindow").addEventListener("touchend", startCollecting);
+    document.querySelector("[name=titleButton]").addEventListener("click", startCollecting);
+    ;
 
 });
 
+// const demo = () =>{
+//     var textbox_element = document.querySelector("textbox");
+//     var new_element = document.createElement('p');
+//     new_element.textContent = '追加テキスト';
+//     textbox_element.appendChild(new_element);
+// }
+
 //解析開始
 const startCollecting = () => {
+
+
+
     audioContext = new AudioContext();
     isCollecting = true;
     navigator.getUserMedia({
@@ -330,10 +341,11 @@ const analyseVoice = () => {
     drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
     drawRectangle(data, dataIndex, canvasTimeline);
     drawSpectrogram(data, dataIndex, canvasSpectrogram);
-
 }
 
+const updateData = () => {
 
+}
 
 
 //アニメーション再生・ループ
@@ -345,8 +357,6 @@ const animateCanvases = () => {
             startTime = performance.now() / 1000;
             audioTime = data["dataList"][dataIndex].deltaTime;
         }
-
-
 
         drawTime = (performance.now() / 1000) - startTime;
 
@@ -377,7 +387,6 @@ const animateCanvases = () => {
                 dataIndex = -1;
                 console.log("loop");
                 requestAnimationFrame(animateCanvases);
-
                 return;
             }
             audioTime = Time;
@@ -527,7 +536,7 @@ const getDBPeak = (_dataList) => {
         if (sample > peak) {
             peak = sample;
             volume = peak;
-            N_volume = peak/255;
+            N_volume = peak / 255;
         }
     }
     return peak;
