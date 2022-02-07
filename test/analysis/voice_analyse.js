@@ -1,10 +1,12 @@
+
+
 // クロスブラウザ定義
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
 //変数定義
 const beforeStorageTime = 1.0;                  //収録開始前保存する時間
-//const afterAtorageTime = 5.0;                 //収録開始後保存する時間上限
+const afterAtorageTime = 5.0;                   //収録開始後保存する時間上限
 
 //時間系
 let startTime;
@@ -21,8 +23,8 @@ let audioData = [];                             //バッファデータをPush�
 let spectrums;                                  //周波数ごとのデータを保存する配列
 let spectrumPeak;                               //周波数のピークの値
 let N_spectrumPeak;                             //周波数のピークの値(正規化)
-let volume;                               //周波数のピークの値
-let N_volume;                              //周波数のピークの値(正規化)
+let volume;                                     //周波数のピークの値
+let N_volume;                                   //周波数のピークの値(正規化)
 let timeDomainArray;                            //時間領域ごとのデータを保存する配列
 let audioDeltaTime;                             //オーディオ処理ごとのデルタタイム用変数
 
@@ -37,26 +39,18 @@ const colorMap = generateColorMap({ r: 0, g: 0, b: 255 }, { r: 0, g: 255, b: 0 }
 
 // キャンバス
 //リアルタイム描画側
-let canvasTimeline = document.querySelector('#canvasTimeline');
-
-let canvasFrequency = document.querySelector('#canvasFrequency');
-
-let canvasTimeDomain = document.querySelector('#canvasTimeDomain');
-
-let canvasSpectrogram = document.querySelector('#canvasSpectrogram');
-let canvas_S_Context = canvasSpectrogram.getContext('2d');
-canvas_S_Context.fillStyle = colorMap[0];
-canvas_S_Context.fillRect(0, 0, canvasSpectrogram.width, canvasSpectrogram.height);
-
+let canvasTimeline;
+let canvasFrequency;
+let canvasTimeDomain;
+let canvasSpectrogram;
+let canvas_S_Context;
 //再生中描画する側
-let A_canvasFrequency = document.querySelector('#A_canvasFrequency');
+let A_canvasFrequency;
+let A_canvasTimeDomain;
+let A_canvasSpectrogram;
+let A_canvas_S_Context;
 
-let A_canvasTimeDomain = document.querySelector('#A_canvasTimeDomain');
-
-let A_canvasSpectrogram = document.querySelector('#A_canvasSpectrogram');
-let A_canvas_S_Context = A_canvasSpectrogram.getContext('2d');
-A_canvas_S_Context.fillStyle = colorMap[0];
-A_canvas_S_Context.fillRect(0, 0, A_canvasSpectrogram.width, A_canvasSpectrogram.height);
+let audioAnalyser;
 
 
 let dataIndex = 0;              //再生中dataListを順に見るためのIndex
@@ -90,82 +84,116 @@ let visual = {               //ビジュアル用に正規化
 };
 
 window.addEventListener("load", () => {
-    document.querySelector("#TitleWindow").addEventListener("touchend", startCollecting);
-    document.querySelector("[name=titleButton]").addEventListener("click", startCollecting);
-    ;
+    //document.querySelector("#TitleWindow").addEventListener("touchend", startCollecting);
+    //document.querySelector("[name=titleButton]").addEventListener("click", startCollecting);
+    document.querySelector("[name=ButtonOpenMovie]").addEventListener("click", playDataList);
+    getCanvases();
 
 });
 
-// const demo = () =>{
-//     var textbox_element = document.querySelector("textbox");
-//     var new_element = document.createElement('p');
-//     new_element.textContent = '追加テキスト';
-//     textbox_element.appendChild(new_element);
-// }
+const getCanvases = () => {
+    canvasTimeline = document.querySelector('#canvasTimeline');
+    canvasFrequency = document.querySelector('#canvasFrequency');
+    canvasTimeDomain = document.querySelector('#canvasTimeDomain');
+    canvasSpectrogram = document.querySelector('#canvasSpectrogram');
+
+
+    canvas_S_Context = canvasSpectrogram.getContext('2d');
+    canvas_S_Context.fillStyle = colorMap[0];
+    canvas_S_Context.fillRect(0, 0, canvasSpectrogram.width, canvasSpectrogram.height);
+
+    A_canvasFrequency = document.querySelector('#A_canvasFrequency');
+    A_canvasTimeDomain = document.querySelector('#A_canvasTimeDomain');
+    A_canvasSpectrogram = document.querySelector('#A_canvasSpectrogram');
+    A_canvas_S_Context = A_canvasSpectrogram.getContext('2d');
+    A_canvas_S_Context.fillStyle = colorMap[0];
+    A_canvas_S_Context.fillRect(0, 0, A_canvasSpectrogram.width, A_canvasSpectrogram.height);
+}
+
 
 //解析開始
-const startCollecting = () => {
 
+const medias = {
+    audio: true,
 
+    video: false
+};
 
-    audioContext = new AudioContext();
+export const Demo = () => {
+
+    console.log("module Demo");
+}
+
+export const startCollecting = () => {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    console.log("startCollecting");
+    // サンプルレートを保持しておく
     isCollecting = true;
-    navigator.getUserMedia({
-        audio: {
-            sampleRate: { ideal: 32000 }
-        }
-    },
-        (stream) => {       //メディアアクセス要求が承認されたときに呼ばれる関数
-            // 音声入力関連のノードの設定
-            localMediaStream = stream;
-            let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
-            localScriptProcessor = scriptProcessor;
-            let mediastreamsource = audioContext.createMediaStreamSource(stream);
-            mediastreamsource.connect(scriptProcessor);
-            scriptProcessor.onaudioprocess = onAudioProcess;
-            scriptProcessor.connect(audioContext.destination);
+    const promise = navigator.mediaDevices.getUserMedia(medias);
 
-            // 音声解析関連のノードの設定
-            audioAnalyser = audioContext.createAnalyser();
-            audioAnalyser.fftSize = 2048;
-            frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
-            timeDomainData = new Uint8Array(audioAnalyser.fftSize);
-            mediastreamsource.connect(audioAnalyser);
-        },
-        (e) => {
-            console.log(e);
-        });
+    promise.then(sucsess)
+    //.then(error);
+
+    function sucsess(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
+        // 音声入力関連のノードの設定
+
+        localMediaStream = stream;
+        let scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+        localScriptProcessor = scriptProcessor;
+        let mediastreamsource = audioContext.createMediaStreamSource(stream);
+        mediastreamsource.connect(scriptProcessor);
+        scriptProcessor.onaudioprocess = onAudioProcess;
+        scriptProcessor.connect(audioContext.destination);
+
+        // 音声解析関連のノードの設定
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 2048;
+        //frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+        //timeDomainData = new Uint8Array(audioAnalyser.fftSize);
+        mediastreamsource.connect(audioAnalyser);
+    };
+    // function error(e) {
+    //     alert(e);
+    //     console.log(e);
+    // };
 
     createJsonDataFormat();
-    addButtonEvent();
+    //addButtonEvent();
 };
 
 //収録開始ボタンと収録停止ボタンにイベントを追加.
 const addButtonEvent = () => {
     document.querySelector('[name=ButtonStartRec]').addEventListener("click", () => {
-        if (!isRecording) {
-            deleteData();
-            isRecording = true;
-            isPlaying = false;
-
-            //現在時刻，sampleRate，fsdivN，をDataに入れる．
-            data.time = new Date();
-            data.samplingRate = audioContext.sampleRate;
-            data.fsDivN = fsDivN;
-            console.log("data:     " + data.time);
-
-        }
+        startRecorging();
     });
 
     document.querySelector('[name=ButtonStopRec]').addEventListener("click", () => {
-        if (isRecording) {
-            isRecording = false;
-            startRecordingTime = 0;                             //時間をリセット
-            data.dataList = dataList;
-            archiveData(data);
-
-        }
+        stopRecording();
     });
+}
+
+const startRecorging = () => {
+    if (!isRecording) {
+        deleteData();
+        isRecording = true;
+        isPlaying = false;
+
+        //現在時刻，sampleRate，fsdivN，をDataに入れる．
+        data.time = new Date();
+        data.samplingRate = audioContext.sampleRate;
+        data.fsDivN = fsDivN;
+        console.log("data:     " + data.time);
+    }
+}
+
+const stopRecording = () => {
+    if (isRecording) {
+        isRecording = false;
+        startRecordingTime = 0;                             //時間をリセット
+        data.dataList = dataList;
+        archiveData(data);
+
+    }
 }
 
 const deleteData = () => {
@@ -343,13 +371,12 @@ const analyseVoice = () => {
     drawSpectrogram(data, dataIndex, canvasSpectrogram);
 }
 
-const updateData = () => {
 
-}
 
 
 //アニメーション再生・ループ
 const animateCanvases = () => {
+    console.log("animateCanvas!!!!!!!!!!!!!!!!!!!!!!");
     let data = playingData;
     if (isPlaying) {
         if (dataIndex == -1) {
