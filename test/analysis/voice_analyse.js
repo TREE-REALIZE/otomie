@@ -92,12 +92,12 @@ let visual = {               //ビジュアル用に正規化
 window.addEventListener("load", () => {
     //document.querySelector("#TitleWindow").addEventListener("touchend", startCollecting);
     //document.querySelector("[name=titleButton]").addEventListener("click", startCollecting);
-    document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
-    getCanvases();
+    // document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
+    // getCanvases();
 
 });
 
-const getCanvases = () => {
+export const getCanvases = () => {
     canvasTimeline = document.querySelector('#canvasTimeline');
     canvasFrequency = document.querySelector('#canvasFrequency');
     canvasTimeDomain = document.querySelector('#canvasTimeDomain');
@@ -125,10 +125,6 @@ const medias = {
     video: false
 };
 
-export const Demo = () => {
-
-    console.log("module Demo");
-}
 
 export const startCollecting = () => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -169,8 +165,7 @@ export const startCollecting = () => {
 
 //収録開始ボタンと収録停止ボタンにイベントを追加.
 const addButtonEvent = () => {
-    document.querySelector('#ButtonStartRec').addEventListener("click",startRecording);
-
+    document.querySelector('#ButtonStartRec').addEventListener("click", startRecording);
     document.querySelector('#ButtonStopRec').addEventListener("click", stopRecording);
 }
 
@@ -246,21 +241,13 @@ const onAudioProcess = (e) => {
     // 音声のバッファを作成，インプットデータを保存
     let input = e.inputBuffer.getChannelData(0);    //PCMデータ：信号の強度が格納されている.
     bufferData = new Float32Array(input);
+    audioData.push(bufferData);                     //オーディオデータにバッファデータを積んでいく
 
-    console.log("maxDecibels" + audioAnalyser.maxDecibels);
-    //オーディオデータにバッファデータを積んでいく
-    audioData.push(bufferData);
-
-
-
-    // 波形を解析
+    // FFT
     analyseVoice();
 };
 
-const calcAudioDeltaTime = () => {
-    audioDeltaTime = audioContext.currentTime - audioLastTime;
-    audioLastTime = audioContext.currentTime;
-}
+
 
 const createJsonDataFormat = () => {
     data = {
@@ -344,8 +331,6 @@ const analyseVoice = () => {
     //デルタタイムの算出
     calcAudioDeltaTime();
 
-
-
     let tracks = localMediaStream.getTracks();
     for (let i = 0; i < tracks.length; i++) {
 
@@ -379,7 +364,13 @@ const analyseVoice = () => {
     countRecTime(audioDeltaTime);
     judgeRecTime(afterStorageTime);
 }
+//オーディオ用のデルタ時間を計算
+const calcAudioDeltaTime = () => {
+    audioDeltaTime = audioContext.currentTime - audioLastTime;
+    audioLastTime = audioContext.currentTime;
+}
 
+//リアルタイム描画開始用のスイッチ
 export const switchRealTime = () => {
     if (drawRealTime == false) {
         drawRealTime = true;
@@ -391,6 +382,7 @@ export const switchRealTime = () => {
     }
 }
 
+//収録時間を計算
 const countRecTime = (_deltaTime) => {
     if (isRecording == true) {
         recTime += _deltaTime;
@@ -400,22 +392,34 @@ const countRecTime = (_deltaTime) => {
         return;
     }
 }
+
+//収録時間が上限に達したら収録を停止
 const judgeRecTime = (_afterAtorageTime) => {
     if (recTime >= _afterAtorageTime) {
         console.log("recTime >= afterAtorageTime");
         stopRecording();
     }
-    else{
+    else {
         return;
     }
 }
 
-
+export const getPlayingData = () => {
+    let numData = 0;
+    let data;
+    if (Object.keys(playingData).length > 0) {
+        console.log("playingData : " + playingData);
+        numData = 1;
+        data = "thumbnail.png";
+    } else {
+        console.log("playingData none");
+        numData = -1;
+    }
+}
 
 
 //アニメーション再生・ループ
 const animateCanvases = () => {
-    console.log("animateCanvas!!!!!!!!!!!!!!!!!!!!!!");
     let data = playingData;
     if (isPlaying) {
         if (dataIndex == -1) {
@@ -446,8 +450,8 @@ const animateCanvases = () => {
             drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
             drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
 
-            dataIndex += 1;
 
+            dataIndex += 1;
             //ループする条件
             if (data["dataList"].length - 1 < dataIndex) {
                 dataIndex = -1;
@@ -465,6 +469,7 @@ const animateCanvases = () => {
 }
 
 
+
 //スペクトラムを描画
 const drawSpectCanvas = (_data, _index, _canvas) => {
     let targetCanvas = _canvas;
@@ -472,13 +477,9 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
     targetCanvasContext.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
     targetCanvasContext.beginPath();
 
-    //描画処理する対象
-    let rawData = _data["dataList"][_index]["raw"];
 
-
-    //描画処理する対象の中の周波数データリスト
-    let targetSpectDataList = rawData["frequency"];
-
+    let rawData = _data["dataList"][_index]["raw"];         //描画処理する対象
+    let targetSpectDataList = rawData["frequency"];         //描画処理する対象の中の周波数データリスト
 
     for (let i = 0, len = targetSpectDataList.length; i < len; i++) {
         //canvasにおさまるように線を描画
@@ -489,15 +490,12 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
         } else {
             targetCanvasContext.lineTo(x, y);
         }
-        let f = Math.floor(i * fsDivN);  // index -> frequency;
+        let f = Math.floor(i * fsDivN);                                     // index -> frequency;
 
-        // 500 Hz単位にy軸の線とラベル出力
-        if ((f % 500) === 0) {
+        if ((f % 500) === 0) {                                              // 500 Hz単位にy軸の線とラベル出力
             let text = (f < 1000) ? (f + ' Hz') : ((f / 1000) + ' kHz');
-            // Draw grid (X)
-            targetCanvasContext.fillRect(x, 0, 1, targetCanvas.height);
-            // Draw text (X)
-            targetCanvasContext.fillText(text, x, targetCanvas.height);
+            targetCanvasContext.fillRect(x, 0, 1, targetCanvas.height);     // Draw grid (X)
+            targetCanvasContext.fillText(text, x, targetCanvas.height);     // Draw text (X)
         }
     }
     targetCanvasContext.stroke();
@@ -580,21 +578,18 @@ const drawSpectrogram = (_data, _index, _canvas) => {
     }
 }
 
+//周波数ピークを計算
 const calcFrequencyPeak = (_data, _index) => {
     let rawData = _data["dataList"][_index]["raw"];
     let requencyList = rawData["frequency"];
     let spectrumPeakIndex = requencyList.indexOf(Math.max(...requencyList));
-    console.log("spectrumPedata[dataList]length" + data["dataList"].length);
-    console.log("spectrumPeakIndex" + spectrumPeakIndex);
     spectrumPeak = fsDivN * spectrumPeakIndex;
     N_spectrumPeak = spectrumPeak / (audioContext.sampleRate / 2);
-    console.log("spectrumPeak" + spectrumPeak + "Hz");
-    console.log("NspectrumPeakLength" + N_spectrumPeak.length);
-    //let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
+
 }
 
 
-
+//振幅のピークを計算
 const getDBPeak = (_dataList) => {
     let peak = -100;
     for (let i = 0, len = _dataList.length; i < len; i++) {

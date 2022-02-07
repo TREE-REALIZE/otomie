@@ -20,10 +20,13 @@ const micOnTouched = () => {
 
 import * as funcs from './voice_analyse.js';
 
-
 window.addEventListener("load", () => {
-    document.querySelector("#TitleWindow").addEventListener("click", micOn);    
-    document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);   
+    funcs.getCanvases();
+    document.querySelector("#TitleWindow").addEventListener("click", micOn);
+    document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);
+    document.querySelector("#getArchive").addEventListener("click", getArchive);
+    //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
+
     console.log("load finish");
 });
 
@@ -45,9 +48,10 @@ const micOn = ({
     }
 }
 
+// drawRealTime(_canvas, { onReady, onProcess, onComplete });
+// play(_canvas, { onReady, onProcess, onComplete });
 
-
-const drawRealTime = ({
+const drawRealTime = (_canvas, {
     onReady = () => { },
     onProcess = () => { },
     onComplete = () => { },
@@ -82,7 +86,13 @@ const getArchive = ({
     // ・
     // ・
     // ・
-    let numImage = 0;
+    console.log("getArchive");
+    funcs.getPlayingData;
+    let numImage = funcs.getPlayingData.numData;
+    console.log("funcs.getPlayingData.numData:  " + funcs.getPlayingData.numData);
+
+
+
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
