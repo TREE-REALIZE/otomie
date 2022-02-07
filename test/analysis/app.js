@@ -23,6 +23,7 @@ import * as funcs from './voice_analyse.js';
 
 window.addEventListener("load", () => {
     document.querySelector("#TitleWindow").addEventListener("click", micOn);    
+    document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);   
     console.log("load finish");
 });
 
@@ -33,7 +34,6 @@ const micOn = ({
 } = {}) => {
 
     //マイクをONにする処理
-
     funcs.startCollecting();
 
     if (onReady && typeof onReady === "function") {
@@ -43,10 +43,6 @@ const micOn = ({
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
     }
-}
-
-const onReady = () =>{
-    console.log("OnREADY");
 }
 
 
@@ -61,8 +57,8 @@ const drawRealTime = ({
     // ・
     // ・
     // ・
-    console.log("drawRealTime");
-
+    funcs.switchRealTime();
+    console.log("drawRealTime:   " + funcs.drawRealTime);
 
     if (onReady && typeof onReady === "function") {
         onReady(true);

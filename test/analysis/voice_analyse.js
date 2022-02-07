@@ -6,11 +6,12 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 //変数定義
 const beforeStorageTime = 1.0;                  //収録開始前保存する時間
-const afterAtorageTime = 5.0;                   //収録開始後保存する時間上限
+const afterStorageTime = 5.0;                   //収録開始後保存する時間上限
 
 //時間系
 let startTime;
 let audioTime;
+
 
 //音源保存用変数
 let localMediaStream = null;
@@ -32,6 +33,9 @@ let audioDeltaTime;                             //オーディオ処理ごとの
 let isCollecting = false;                       //収音中
 let isRecording = false;                        //収録中
 let isPlaying = false;                          //再生中
+
+//描画スイッチ
+export let drawRealTime = false;
 
 
 //キャンバス要カラーマップ作製
@@ -58,7 +62,9 @@ let dataIndex = 0;              //再生中dataListを順に見るためのIndex
 let playingData = {};
 let fsDivN;                     //周波数分解能(何ヘルツおきに点を配置するか) 
 
-let startRecordingTime = 0;
+let startCollectingTime = 0;
+let recTime = 0;
+
 let animationBeforeTime = -1;
 let animationCurrentTime = 0;
 let drawDeltaTime = 0;
@@ -86,7 +92,7 @@ let visual = {               //ビジュアル用に正規化
 window.addEventListener("load", () => {
     //document.querySelector("#TitleWindow").addEventListener("touchend", startCollecting);
     //document.querySelector("[name=titleButton]").addEventListener("click", startCollecting);
-    document.querySelector("[name=ButtonOpenMovie]").addEventListener("click", playDataList);
+    document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
     getCanvases();
 
 });
@@ -158,24 +164,22 @@ export const startCollecting = () => {
     // };
 
     createJsonDataFormat();
-    //addButtonEvent();
+    addButtonEvent();
 };
 
 //収録開始ボタンと収録停止ボタンにイベントを追加.
 const addButtonEvent = () => {
-    document.querySelector('[name=ButtonStartRec]').addEventListener("click", () => {
-        startRecorging();
-    });
+    document.querySelector('#ButtonStartRec').addEventListener("click",startRecording);
 
-    document.querySelector('[name=ButtonStopRec]').addEventListener("click", () => {
-        stopRecording();
-    });
+    document.querySelector('#ButtonStopRec').addEventListener("click", stopRecording);
 }
 
-const startRecorging = () => {
+const startRecording = () => {
+    //console.log("startRecorging");
     if (!isRecording) {
-        deleteData();
         isRecording = true;
+        deleteData();
+        recTime = 0;
         isPlaying = false;
 
         //現在時刻，sampleRate，fsdivN，をDataに入れる．
@@ -184,15 +188,14 @@ const startRecorging = () => {
         data.fsDivN = fsDivN;
         console.log("data:     " + data.time);
     }
-}
+};
 
 const stopRecording = () => {
     if (isRecording) {
         isRecording = false;
-        startRecordingTime = 0;                             //時間をリセット
+        startCollectingTime = 0;                             //時間をリセット
         data.dataList = dataList;
         archiveData(data);
-
     }
 }
 
@@ -248,8 +251,7 @@ const onAudioProcess = (e) => {
     //オーディオデータにバッファデータを積んでいく
     audioData.push(bufferData);
 
-    //デルタタイムの算出
-    calcAudioDeltaTime();
+
 
     // 波形を解析
     analyseVoice();
@@ -317,14 +319,14 @@ const createFrameDataObj = () => {
 //解析データをリストに積んでいく処理
 const createData = () => {
     dataList.push(frameData);
-    startRecordingTime += frameData.deltaTime;
+    startCollectingTime += frameData.deltaTime;
     shiftFrameDataObjList();
     data.dataList = dataList;
 }
 
 //1秒分のデータが保存されたらリストからシフトしていく処理
 const shiftFrameDataObjList = () => {
-    if (startRecordingTime >= beforeStorageTime) {
+    if (startCollectingTime >= beforeStorageTime) {
         if (!isRecording) {
             dataList.shift();
         }
@@ -338,6 +340,10 @@ const analyseVoice = () => {
     fsDivN = audioContext.sampleRate / audioAnalyser.fftSize;           //周波数分解能
     console.log("audioContext.sampleRate: " + audioContext.sampleRate);
     console.log("fsdivN: " + fsDivN);
+
+    //デルタタイムの算出
+    calcAudioDeltaTime();
+
 
 
     let tracks = localMediaStream.getTracks();
@@ -364,11 +370,44 @@ const analyseVoice = () => {
     calcFrequencyPeak(data, dataIndex);
 
     console.log("data[dataList].length-1" + (data["dataList"].length - 1));
+    if (drawRealTime == true) {
+        drawSpectCanvas(data, dataIndex, canvasFrequency);
+        drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
+        drawRectangle(data, dataIndex, canvasTimeline);
+        drawSpectrogram(data, dataIndex, canvasSpectrogram);
+    }
+    countRecTime(audioDeltaTime);
+    judgeRecTime(afterStorageTime);
+}
 
-    drawSpectCanvas(data, dataIndex, canvasFrequency);
-    drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
-    drawRectangle(data, dataIndex, canvasTimeline);
-    drawSpectrogram(data, dataIndex, canvasSpectrogram);
+export const switchRealTime = () => {
+    if (drawRealTime == false) {
+        drawRealTime = true;
+        console.log("drawRealTime" + drawRealTime);
+    }
+    else if (drawRealTime == true) {
+        drawRealTime = false;
+        console.log("drawRealTime" + drawRealTime);
+    }
+}
+
+const countRecTime = (_deltaTime) => {
+    if (isRecording == true) {
+        recTime += _deltaTime;
+        console.log("recTime" + recTime);
+    }
+    else {
+        return;
+    }
+}
+const judgeRecTime = (_afterAtorageTime) => {
+    if (recTime >= _afterAtorageTime) {
+        console.log("recTime >= afterAtorageTime");
+        stopRecording();
+    }
+    else{
+        return;
+    }
 }
 
 
@@ -385,14 +424,14 @@ const animateCanvases = () => {
             audioTime = data["dataList"][dataIndex].deltaTime;
         }
 
-        drawTime = (performance.now() / 1000) - startTime;
+        let drawTime = (performance.now() / 1000) - startTime;
 
         //描画対象のデータのインデックスを次に進める条件
         if (audioTime <= drawTime) {
             let Time = audioTime;
             let processIndex = dataIndex;
 
-            for (i = dataIndex; i < data["dataList"].length - 1; i++) {
+            for (let i = dataIndex; i < data["dataList"].length - 1; i++) {
                 Time += data["dataList"][i].deltaTime;
 
                 //描画対象のデータのインデックスを決定する条件
