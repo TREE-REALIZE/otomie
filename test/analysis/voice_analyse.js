@@ -167,6 +167,16 @@ const addButtonEvent = () => {
     //document.querySelector('#ButtonStopRec').addEventListener("click", stopRecording);
 }
 
+
+const getPrepareRec = () =>{
+    if(typeof isRecording !== 'undefined'){
+        playingData = {};      
+        return true;        
+    }else{
+        return false;
+
+    }
+};
 const startRecording = () => {
     //console.log("startRecorging");
     if (!isRecording) {
@@ -203,6 +213,7 @@ const archiveData = (_data) => {
     //exportText("jsonData.json",jsonData);
     createJsonDataFormat();
     decordeJsonDataList(jsonData);
+    jsonData = {};
 }
 
 //受けとったJsonデータをオブジェクトにへんかんする．
@@ -415,6 +426,14 @@ const judgeRecTime = (_afterAtorageTime) => {
     }
 }
 
+const deletePlayingData = () => {
+    if (Object.keys(playingData).length > 0) {
+        if (isPlaying == true) {
+            isPlaying = false;
+        }
+        playingData = {};
+    }
+}
 
 // const getPlayingData = () => {
 //     console.log("getPlayingData");

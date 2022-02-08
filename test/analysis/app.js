@@ -25,6 +25,7 @@ window.addEventListener("load", () => {
     document.querySelector("#TitleWindow").addEventListener("click", micOn);
     document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);
     document.querySelector("#getArchive").addEventListener("click", getArchive);
+    document.querySelector("#initRec").addEventListener("click", initRec);
     document.querySelector("#recording").addEventListener("click", recording);
     document.querySelector("#stopRec").addEventListener("click", stopRec);
     document.querySelector("#play").addEventListener("click", play);
@@ -120,15 +121,17 @@ const initRec = ({
     // ・
     // ・
     console.log("initRec");
-
+    let completeInitRec = getPrepareRec;
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
     if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
+        console.log("completeInitRec:  " + completeInitRec());
+        onComplete(completeInitRec());
     }
 }
 
+let element;
 const recording = ({
     onReady = () => { },
     onProcess = () => { },
@@ -139,7 +142,9 @@ const recording = ({
     // ・
     // ・    
     startRecording();
-    console.log("recording");
+    element = document.querySelector('#recTime');
+    setInterval(setRecTime, 10);
+
 
 
     if (onReady && typeof onReady === "function") {
@@ -152,6 +157,11 @@ const recording = ({
         onComplete(true);
     }
 }
+
+const setRecTime = () =>{
+    element.value = recTime;
+};
+
 
 const stopRec = ({
     onReady = () => { },
@@ -231,6 +241,7 @@ const deleteData = ({
     // ・
 
     console.log("deleteData");
+    deletePlayingData();
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
