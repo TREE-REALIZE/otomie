@@ -1,24 +1,4 @@
 'use strict';
-// let isdelete = false;
-// console.log(isdelete);
-// const call = (tf) => {
-//     isdelete = tf;
-//     console.log("tf:  " + tf);
-
-//     if (isdelete == true) {
-//         changeScreen();
-//     } else {
-//         alert("isdelete = false");
-//     }
-// }
-
-// Delete(call);
-
-// const changeScreen = () => {
-//     //UI切り替え処理。。。
-// }
-
-// console.log(isdelete);
 
 // スプラッシュ画面
 {
@@ -32,28 +12,45 @@
 }
 
 // Howto画面
+const onReady =(tf)=>{
+    if(tf == true){
+        console.log("start");
+        startRec();
+    }
+    else{
+        console.log("not start");
+    }
+}
+
 {
     // Howto画面 - 画面クリックでスライド
     const sliderContent = document.querySelectorAll('.SliderContent');
     
-    document.getElementById("ConceptCard").onclick = function () {
+    const conceptCard = document.getElementById('ConceptCard');
+    const clickedConceptCard =()=>{
         sliderContent[0].classList.add('SlideHowtoAnim01');
         sliderContent[1].classList.add('SlideHowtoAnim01');
         sliderContent[2].classList.add('SlideHowtoAnim01');
     };
-    document.getElementById("MicOnCard").onclick = function () {
+    conceptCard.addEventListener('click', clickedConceptCard);
+    const micOnCard = document.getElementById("MicOnCard");
+    const clickedMicOnCard =()=>{
         sliderContent[0].classList.add('SlideHowtoAnim02');
         sliderContent[1].classList.add('SlideHowtoAnim02');
         sliderContent[2].classList.add('SlideHowtoAnim02');
     };
+    micOnCard.addEventListener('click', clickedMicOnCard);
     
     // Howto画面 - 画面クリックで非表示して次へ
     const howToWindow = document.querySelector('#HowToWindow');
     
-    document.getElementById("StartCard").onclick = function () {
+    const startCard = document.getElementById("StartCard");
+    const clickedStartCard =()=> {
         howToWindow.classList.add('Displaynone');
     };
+    startCard.addEventListener('click', clickedStartCard);
 }
+
 
 // 再生画面 - 状態(見た目)切り替え関数 ---↓↓↓↓↓↓↓↓↓↓↓↓---------------------------------------------------------
 const recContainer = document.getElementById('RecContainer');
@@ -98,7 +95,6 @@ function changeRecPlayer() {
 // 再生画面 - 状態切り替え関数 ---↑↑↑↑↑↑↑↑↑↑↑↑-------------------------------------------------------------
 
 
-
 // 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↓↓↓↓↓↓↓↓↓↓↓↓----------------------------------------------------
 let isRecPlay = false;
 const buttonStartRec = document.getElementById('ButtonStartRec');
@@ -106,11 +102,11 @@ const buttonStartRec = document.getElementById('ButtonStartRec');
 const recClick = () => {
     if(!isRecPlay){ //収録中でないなら
         console.log('スタート関数');
-        startRec();
+        startRecFunc();
         isRecPlay = true;
     }else{ //収録中なら
         console.log('ストップ関数');
-        stopRec();
+        stopRecFunc();
         isRecPlay = false;
     }
 }
@@ -132,7 +128,7 @@ function changeRecBtnColor() {
 }
 
 // ----- 収録開始ボタンがおされたら呼ぶ関数
-function startRec(){
+function startRecFunc(){
     changeRecBtnColor(); //収録ボタン色オレンジに変更
     changeRecNow(); //再生画面を収録状態にする
 }
@@ -147,7 +143,7 @@ const initFadeAnim = () => {
     }
 }
 // 再生停止時関数
-function stopRec() {
+function stopRecFunc() {
     changeRecBtnColor(); //収録ボタン色青に変更
     initFadeAnim(); // 初期化関数
     whiteFadePanelOver.classList.add('FadeOutWhiteOverAnim'); // フェードアウトAnimクラス足す
