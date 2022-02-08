@@ -34,9 +34,6 @@
 // Howto画面
 {
     // Howto画面 - 画面クリックでスライド
-    const conceptCard = document.querySelector('#ConceptCard');
-    const micOnCard = document.querySelector('#MicOnCard');
-    const startCard = document.querySelector('#StartCard');
     const sliderContent = document.querySelectorAll('.SliderContent');
     
     document.getElementById("ConceptCard").onclick = function () {
@@ -58,7 +55,7 @@
     };
 }
 
-// 再生画面 - 状態(見た目)切り替え関数 ---↓↓↓↓↓↓↓↓↓↓↓↓-----------------------------------------------------------------
+// 再生画面 - 状態(見た目)切り替え関数 ---↓↓↓↓↓↓↓↓↓↓↓↓---------------------------------------------------------
 const recContainer = document.getElementById('RecContainer');
 // - 収録状態 (撮影ボタン押されたら)
 function changeRecNow(){
@@ -80,6 +77,7 @@ function changeRecNow(){
 function changeRecFinish() {
     recContainer.classList.remove('RecNow');
     recContainer.classList.add('RecFinish');
+    console.log('RecFinish切替');
 }
 // - アイコン状態 (白フェード終了時)
 function changeRecIcon() {
@@ -97,21 +95,26 @@ function changeRecPlayer() {
     recContainer.classList.remove('RecIcon');
     recContainer.classList.add('RecPlayer');
 }
-// 再生画面 - 状態切り替え関数 ---↑↑↑↑↑↑↑↑↑↑↑↑-----------------------------------------------------------------
+// 再生画面 - 状態切り替え関数 ---↑↑↑↑↑↑↑↑↑↑↑↑-------------------------------------------------------------
 
 
 
-// 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↓↓↓↓↓↓↓↓↓↓↓↓--------------------------------------------------------------
+// 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↓↓↓↓↓↓↓↓↓↓↓↓----------------------------------------------------
+let isRecPlay = false;
 const buttonStartRec = document.getElementById('ButtonStartRec');
-buttonStartRec.addEventListener('click', recClick);
 // ボタン押されたら呼ばれる関数
-function recClick(isPlay) {
-    if(!isPlay){ //収録中でないなら
+const recClick = () => {
+    if(!isRecPlay){ //収録中でないなら
+        console.log('スタート関数');
         startRec();
+        isRecPlay = true;
     }else{ //収録中なら
+        console.log('ストップ関数');
         stopRec();
+        isRecPlay = false;
     }
 }
+buttonStartRec.addEventListener('click', recClick);
 
 // --- 収録ボタンのテキストに時間いれる[1]
 const recCountText = document.getElementById('RecCountText');
@@ -135,31 +138,34 @@ function startRec(){
 }
 
 // ----- 収録停止ボタンがおされたor0秒になったら呼ぶ関数
+let isWhiteOut = false;
 const whiteFadePanelOver = document.getElementById('WhiteFadePanelOver');
+// 初期化関数
+const initFadeAnim = () => {
+    if(whiteFadePanelOver.classList.contains('FadeInWhiteOverAnim') == true){
+        whiteFadePanelOver.classList.remove('FadeInWhiteOverAnim');
+    }
+}
+// 再生停止時関数
 function stopRec() {
     changeRecBtnColor(); //収録ボタン色青に変更
-    // 2回目以降フェードインクラス削除
-    if(whiteFadePanelOver.classList.contains('FadeInWhiteInAnim') == true){
-        whiteFadePanelOver.classList.remove('FadeInWhiteInAnim');
-    }
-    // フェードアウトアニメ開始
-    whiteFadePanelOver.classList.add('FadeOutWhiteOverAnim'); 
+    initFadeAnim(); // 初期化関数
+    whiteFadePanelOver.classList.add('FadeOutWhiteOverAnim'); // フェードアウトAnimクラス足す
 }
-// フェードアウトアニメ終了したら
-whiteFadePanelOver.addEventListener('animationend', function () {
-    if (whiteFadePanelOver.classList.contains('FadeOutWhiteOverAnim') == true) {
+// 各フェードアニメーション終わったら呼ばれる
+whiteFadePanelOver.addEventListener('animationend', () => {
+    if(!isWhiteOut){ //完全真っ白
+        isWhiteOut = true;
         changeRecFinish(); // 再生画面を収録終了状態にする
-        whiteFadePanelOver.classList.remove('FadeOutWhiteOverAnim');
-        whiteFadePanelOver.classList.add('FadeInWhiteOverAnim'); // 白フェードインさせる
+        whiteFadePanelOver.classList.remove('FadeOutWhiteOverAnim'); // フェードアウトAnimクラス除去
+        whiteFadePanelOver.classList.add('FadeInWhiteOverAnim'); // フェードインAnimクラス足す
+    }else{ //真っ白明けたら
+        isWhiteOut = false;
+        changeRecIcon(); // 再生画面をアイコン状態にする     
     }
 });
-// フェードインアニメ終了したら
-whiteFadePanelOver.addEventListener('animationend', function () {
-    if (whiteFadePanelOver.classList.contains('FadeInWhiteOverAnim') == true) {
-        changeRecIcon(); // 再生画面をアイコン状態にする
-    }
-});
-// 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↑↑↑↑↑↑↑↑↑↑↑↑------------------------------------------------------------
+// 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↑↑↑↑↑↑↑↑↑↑↑↑-----------------------------------------------------
+
 
 
 // 〇〇〇〇再生画面 - アイコン押して再生画面状態に -------------------------------------------
@@ -168,7 +174,7 @@ btnCanvasRecMovie.addEventListener('click', changeRecPlayer);
 // 〇〇〇〇再生画面 - 戻るボタン押してアイコン状態に -------------------------------------------
 const btnBackToRecWindow = document.getElementById('ButtonBackToRecWindow');
 btnBackToRecWindow.addEventListener('click', changeRecIcon);
-// 〇〇〇〇再生画面 - 右下削除ボタン押してポップアップ表示・非表示 -------------------------------------------
+// 〇〇〇〇再生画面 - 右下削除ボタン押してポップアップ表示・非表示 ------------------------------------------
 const btnDeleteMovie = document.getElementById('ButtonDeleteMovie');
 const deleteConfirmText = document.getElementById('DeleteConfirmText');
 btnDeleteMovie.addEventListener('click', toggleDeleteConfirm);
@@ -219,6 +225,7 @@ function keypress_ivent(e) {
         recContainer.classList.add('RecIcon');
     }
     if (e.key === 'd' || e.key === 'D') {
+        console.log(isRecPlay);
     }
     return false;
 }

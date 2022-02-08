@@ -13,10 +13,9 @@ body {
 
 /* すべての画面共通の外枠 */
 .Window {
-    position: relative;
+    position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgb(255, 255, 255);
 
     /* あとで消す */
     width: 428px;
@@ -35,9 +34,9 @@ body {
 /* ----------------------各画面---------------------- */
 /*-------- スプラッシュ画面 --------*/
 #SplashWindow {
-    /* background-color: coral; */
+    background-color: rgb(255, 255, 255);
     text-align: center;
-    /* z-index: 100; */
+    z-index: 50;
 }
 #RealizeImage {
     position: absolute;
@@ -127,7 +126,7 @@ body {
 
 /*-------- Howto画面 --------*/
 #HowToWindow {
-    /* text-align: center; */
+    z-index: 40;
 }
 .Slider {
     width: 100%;
@@ -139,6 +138,7 @@ body {
     align-items: center;
 }
 .SliderContent {
+    position: relative;
     min-width: 100%;
 }
 /* Howto画像 */
@@ -181,8 +181,9 @@ body {
 
 /*-------------------- 収録画面 -----------------------*/
 #RecWindow {
-    background-color: rgb(255, 226, 226);
+    background-color: rgb(255, 255, 255);
     text-align: center;
+    z-index: 10;
 }
 /* 収録画面のグラフィック */
 #CanvasRealTime {
@@ -331,7 +332,15 @@ body {
 
 /*--------------------- 再生画面(収録済み) -------------------------*/
 #PlayWindow {
-    text-align: center;
+    pointer-events: none;
+    z-index: 20;
+}
+/* クリックできるUI */
+#RecContainer.RecIcon #CanvasRecMovie,
+#RecContainer.RecPlayer #ButtonStartPlay,
+#RecContainer.RecPlayer #ButtonBackToRecWindow,
+#RecContainer.RecPlayer #ButtonDeleteMovie {
+    pointer-events: auto;
 }
 /* 収録中・収録終了・プレイヤー状態共通 */
 #RecContainer.RecNow,
@@ -357,8 +366,7 @@ body {
     width: 340px;
     height: 340px;
     border-radius: 30px;
-    background-color: rgb(194, 194, 194);
-    transition-duration: 1s;
+    background-color: rgb(125, 255, 98);
 }
 /* それ以外非表示 */
 #RecContainer.RecFinish #WhiteFadePanelPlay,
@@ -385,7 +393,7 @@ body {
     width: 105px;
     height: 105px;
     border-radius: 15%;
-    background-color: rgb(180, 180, 180);
+    background-color: rgb(125, 255, 98);
 }
 /* その他 */
 #RecContainer.RecIcon #CanvasWaveFormPlay,
@@ -423,7 +431,7 @@ body {
     width: 340px;
     height: 340px;
     border-radius: 30px;
-    background-color: rgb(194, 194, 194);
+    background-color: rgb(125, 255, 98);
 }
 /* 波形 */
 #RecContainer.RecPlayer #CanvasWaveFormPlay {
@@ -556,6 +564,10 @@ body {
 }
 
 /* ---------- 画面上にかぶるUI ---------- */
+#OverWindow {
+    z-index: 30;
+    pointer-events: none;
+}
 /* タイトルロゴ */
 #TitleLogo {
     position: absolute;
@@ -564,7 +576,7 @@ body {
     height: 46px;
 }
 /* 白フェード用板 */
-#WhiteFadePanelPlayOver {
+#WhiteFadePanelOver {
     position: absolute;
     top: 0;
     left: 0;
@@ -574,7 +586,7 @@ body {
 /* 白フェードアウトアニメ */
 .FadeOutWhiteOverAnim {
     animation-name: fadeOutWhiteOverAnim;
-    animation-duration: 1s; 
+    animation-duration: 0.5s; 
     animation-timing-function: ease;
     animation-fill-mode: forwards;
 }
@@ -589,7 +601,7 @@ body {
 /* 白フェードインアニメ */
 .FadeInWhiteOverAnim {
     animation-name: fadeInWhiteOverAnim;
-    animation-duration: 1s; 
+    animation-duration: 0.5s; 
     animation-timing-function: ease;
     animation-fill-mode: forwards;
 }
@@ -603,6 +615,7 @@ body {
 }
 /* 削除確認テキスト */
 #DeleteConfirmText.ActivePopupWindow {
+    pointer-events: auto;
     position: absolute;
     top: 273px;
     left: 57px;
