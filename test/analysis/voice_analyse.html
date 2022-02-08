@@ -29,7 +29,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>音声解析</title>
-    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.js"></script> -->
     <style type="text/css">
         #realTimeGraphs,
         #laterGraphs {
@@ -41,24 +41,29 @@
             display: flex;
         }
     </style>
-    <!-- <script src="app.js"></script> -->
-    <script type="module" src="app.js"></script>
+    <script src="voice_analyse.js"></script>
+    <script src="app.js"></script>
 
 </head>
 
 <body>
-    <div id="TitleWindow">
-        <canvas width="100" height="100"></canvas>
-        <button type="button" name="titleButton">title</button>
 
-    </div>>
+    <canvas width="100" height="100"></canvas>
+    <button id="TitleWindow" type="button" name="titleButton">micOn</button>
+
+
     <button id="drawRealTime" type="button">drawRealTime</button>
     <button id="getArchive" type="button">getArchive</button>
-    <button id="ButtonStartRec" type="button" name="ButtonStartRec">収録開始</button>
-    <button id="ButtonStopRec" type="button" name="ButtonStopRec">収録停止</button>
+    <button id="recording" type="button" name="ButtonStartRec">recording</button>
+    <button id="stopRec" type="button" name="ButtonStopRec">stopRec</button>
+    <button id="play" type="button" name="ButtonStopRec">play</button>
+    <button id="stopPlay" type="button" name="ButtonStopRec">stopPlay</button>
+    <button id="deleteData" type="button" name="ButtonDeleteData">deleteData</button>
 
 
-    <button id="ButtonOpenMovie" type="button">再生</button>
+
+
+    <!-- <button id="ButtonOpenMovie" type="button">再生</button> -->
 
 
     <hr>

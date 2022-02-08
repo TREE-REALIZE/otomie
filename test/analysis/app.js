@@ -18,13 +18,20 @@ const micOnTouched = () => {
 □■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■
  */
 
-import * as funcs from './voice_analyse.js';
+
 
 window.addEventListener("load", () => {
-    funcs.getCanvases();
+
     document.querySelector("#TitleWindow").addEventListener("click", micOn);
     document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);
     document.querySelector("#getArchive").addEventListener("click", getArchive);
+    document.querySelector("#recording").addEventListener("click", recording);
+    document.querySelector("#stopRec").addEventListener("click", stopRec);
+    document.querySelector("#play").addEventListener("click", play);
+    document.querySelector("#stopPlay").addEventListener("click", stopPlay);
+    document.querySelector("#deleteData").addEventListener("click", deleteData);
+
+    getCanvases();
     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
 
     console.log("load finish");
@@ -37,7 +44,7 @@ const micOn = ({
 } = {}) => {
 
     //マイクをONにする処理
-    funcs.startCollecting();
+    startCollecting();
 
     if (onReady && typeof onReady === "function") {
         console.log("onReady && typeof onReady ");
@@ -61,8 +68,8 @@ const drawRealTime = (_canvas, {
     // ・
     // ・
     // ・
-    funcs.switchRealTime();
-    console.log("drawRealTime:   " + funcs.drawRealTime);
+    switchRealTime();
+    //console.log("drawRealTime:   " + drawRealTime);
 
     if (onReady && typeof onReady === "function") {
         onReady(true);
@@ -87,20 +94,16 @@ const getArchive = ({
     // ・
     // ・
     console.log("getArchive");
-    funcs.getPlayingData;
-    let numImage = funcs.getPlayingData.numData;
-    console.log("funcs.getPlayingData.numData:  " + funcs.getPlayingData.numData);
-
 
 
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
     if (onReady && typeof onReady === "function") {
-        getNum(numImage);
+        getNum(getNumPlayingData());
     }
     if (onComplete && typeof onComplete === "function") {
-        getImage("imageFile");
+        getImage(getThumbnail());
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
@@ -135,14 +138,15 @@ const recording = ({
     // ・
     // ・
     // ・    
+    startRecording();
     console.log("recording");
-    let recordingTime = 0;
+
 
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
     if (onProcess && typeof onProcess === "function") {
-        onProcess(recordingTime);
+        onProcess(recTime);
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
@@ -158,6 +162,7 @@ const stopRec = ({
     // ・
     // ・
     // ・
+    stopRecording();
     console.log("stopRec");
 
     if (onReady && typeof onReady === "function") {
@@ -180,6 +185,7 @@ const play = ({
     // ・
     // ・
     console.log("play");
+    playDataList();
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
@@ -202,7 +208,7 @@ const stopPlay = ({
     // ・
     // ・
     // ・
-
+    stopDataList();
     console.log("stopPlay");
     if (onReady && typeof onReady === "function") {
         onReady(true);

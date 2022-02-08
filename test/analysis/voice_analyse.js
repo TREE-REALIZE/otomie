@@ -35,7 +35,7 @@ let isRecording = false;                        //収録中
 let isPlaying = false;                          //再生中
 
 //描画スイッチ
-export let drawRealTime = false;
+let isDrawRealTime = false;
 
 
 //キャンバス要カラーマップ作製
@@ -97,7 +97,7 @@ window.addEventListener("load", () => {
 
 });
 
-export const getCanvases = () => {
+const getCanvases = () => {
     canvasTimeline = document.querySelector('#canvasTimeline');
     canvasFrequency = document.querySelector('#canvasFrequency');
     canvasTimeDomain = document.querySelector('#canvasTimeDomain');
@@ -114,7 +114,7 @@ export const getCanvases = () => {
     A_canvas_S_Context = A_canvasSpectrogram.getContext('2d');
     A_canvas_S_Context.fillStyle = colorMap[0];
     A_canvas_S_Context.fillRect(0, 0, A_canvasSpectrogram.width, A_canvasSpectrogram.height);
-}
+};
 
 
 //解析開始
@@ -124,9 +124,7 @@ const medias = {
 
     video: false
 };
-
-
-export const startCollecting = () => {
+const startCollecting = () => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     console.log("startCollecting");
     // サンプルレートを保持しておく
@@ -160,20 +158,20 @@ export const startCollecting = () => {
     // };
 
     createJsonDataFormat();
-    addButtonEvent();
+    //addButtonEvent();
 };
 
 //収録開始ボタンと収録停止ボタンにイベントを追加.
 const addButtonEvent = () => {
-    document.querySelector('#ButtonStartRec').addEventListener("click", startRecording);
-    document.querySelector('#ButtonStopRec').addEventListener("click", stopRecording);
+    //document.querySelector('#ButtonStartRec').addEventListener("click", startRecording);
+    //document.querySelector('#ButtonStopRec').addEventListener("click", stopRecording);
 }
 
 const startRecording = () => {
     //console.log("startRecorging");
     if (!isRecording) {
         isRecording = true;
-        deleteData();
+        deleteDataList();
         recTime = 0;
         isPlaying = false;
 
@@ -194,7 +192,7 @@ const stopRecording = () => {
     }
 }
 
-const deleteData = () => {
+const deleteDataList = () => {
     dataList = [];
 }
 
@@ -222,6 +220,19 @@ const playDataList = () => {
             isPlaying = true;
             dataIndex = -1;
             animateCanvases();
+        }
+    } else {
+        return;
+    }
+}
+
+//再生ボタンを押下したときに実行される関数．
+const stopDataList = () => {
+    if (!isRecording) {
+        if (isPlaying) {
+            isPlaying = false;
+            //dataIndex = -1;
+            //animateCanvases();
         }
     } else {
         return;
@@ -355,7 +366,7 @@ const analyseVoice = () => {
     calcFrequencyPeak(data, dataIndex);
 
     console.log("data[dataList].length-1" + (data["dataList"].length - 1));
-    if (drawRealTime == true) {
+    if (isDrawRealTime == true) {
         drawSpectCanvas(data, dataIndex, canvasFrequency);
         drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
         drawRectangle(data, dataIndex, canvasTimeline);
@@ -371,14 +382,14 @@ const calcAudioDeltaTime = () => {
 }
 
 //リアルタイム描画開始用のスイッチ
-export const switchRealTime = () => {
-    if (drawRealTime == false) {
-        drawRealTime = true;
-        console.log("drawRealTime" + drawRealTime);
+const switchRealTime = () => {
+    if (isDrawRealTime == false) {
+        isDrawRealTime = true;
+        console.log("isDrawRealTime" + isDrawRealTime);
     }
-    else if (drawRealTime == true) {
-        drawRealTime = false;
-        console.log("drawRealTime" + drawRealTime);
+    else if (isDrawRealTime == true) {
+        isDrawRealTime = false;
+        console.log("isDrawRealTime" + isDrawRealTime);
     }
 }
 
@@ -404,18 +415,44 @@ const judgeRecTime = (_afterAtorageTime) => {
     }
 }
 
-export const getPlayingData = () => {
-    let numData = 0;
-    let data;
+
+// const getPlayingData = () => {
+//     console.log("getPlayingData");
+//     if (Object.keys(playingData).length > 0) {
+//         numPlayingData = 1;
+//         thumbnail = "thumbnail.png";
+//     } else {
+//         numPlayingData = 0;
+//         thumbnail = "none";
+//     }
+// }
+
+const getNumPlayingData = () => {
+    let numPlayingData = -1;
     if (Object.keys(playingData).length > 0) {
-        console.log("playingData : " + playingData);
-        numData = 1;
-        data = "thumbnail.png";
+        numPlayingData = 1;
+
+        // thumbnail = "thumbnail.png";
     } else {
-        console.log("playingData none");
-        numData = -1;
+        numPlayingData = 0;
+        // thumbnail = "none";
     }
-}
+    console.log("numPlayingData" + numPlayingData);
+    return numPlayingData;
+};
+const getThumbnail = () => {
+    let thumbnail = "";
+    if (Object.keys(playingData).length > 0) {
+        //numPlayingData = 1;
+        thumbnail = "thumbnail.png";
+    } else {
+        // numPlayingData = 0;
+        thumbnail = "none";
+    }
+    console.log("thumbnail :" + thumbnail);
+    return thumbnail;
+};
+
 
 
 //アニメーション再生・ループ
