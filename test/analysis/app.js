@@ -21,20 +21,19 @@ const micOnTouched = () => {
 
 
 window.addEventListener("load", () => {
-    let canvas = document.querySelector("canvas#A_canvasFrequency");
+    getCanvases();
+
     document.querySelector("#TitleWindow").addEventListener("click", micOn);
-    document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);
+    document.querySelector("#drawRealTime").addEventListener("click", ()=>{drawRealTime(canvasFrequency,{})});
+    console.log("canvasFrequency:   " + canvasFrequency);
     document.querySelector("#getArchive").addEventListener("click", getArchive);
     document.querySelector("#initRec").addEventListener("click", initRec);
     document.querySelector("#recording").addEventListener("click", recording);
     document.querySelector("#stopRec").addEventListener("click", stopRec);
-    document.querySelector("#play").addEventListener("click", ()=>{
-        play(canvas,{});
-    });
+    document.querySelector("#play").addEventListener("click", ()=>{play(A_canvasFrequency,{})});
     document.querySelector("#stopPlay").addEventListener("click", stopPlay);
     document.querySelector("#deleteData").addEventListener("click", deleteData);
 
-    getCanvases();
     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
 
     console.log("load finish");
@@ -71,14 +70,15 @@ const drawRealTime = (_canvas, {
     // ・
     // ・
     // ・
-    switchRealTime(_canvas);
+    switchRealTime(_canvas,{onReady,onProcess,onComplete});
     //console.log("drawRealTime:   " + drawRealTime);
 
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
     if (onProcess && typeof onProcess === "function") {
-        onProcess(true);
+        onProcess(isDrawRealTime);
+
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
@@ -124,6 +124,7 @@ const initRec = ({
     // ・
     console.log("initRec");
     let completeInitRec = getPrepareRec;
+
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
@@ -144,11 +145,7 @@ const recording = ({
     // ・
     // ・    
     startRecording();
-    element = document.querySelector('#recTime');
-    setInterval(setRecTime, 10);
-
-
-
+    
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
@@ -160,9 +157,15 @@ const recording = ({
     }
 }
 
-const setRecTime = () =>{
-    element.value = recTime;
-};
+
+// //UIManager側
+// const setRecTime = () => {
+//     element = document.querySelector('#recTime');
+//     element.value = recTime;
+// };
+
+// setInterval(setRecTime, 10);
+
 
 
 const stopRec = ({
@@ -186,7 +189,7 @@ const stopRec = ({
 
 }
 
-const play = (_canvas,{
+const play = (_canvas, {
     onReady = () => { },
     onProcess = () => { },
     onComplete = () => { },
@@ -202,7 +205,7 @@ const play = (_canvas,{
         onReady(true);
     }
     if (onProcess && typeof onProcess === "function") {
-        onProcess(true);
+        onProcess(isPlaying);
     }
 
     if (onComplete && typeof onComplete === "function") {
