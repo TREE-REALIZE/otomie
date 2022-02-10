@@ -88,7 +88,8 @@ body {
 } */
 .FadeOutBrand {
     animation-name: fadeOutBrand;
-    animation-duration: 3s; 
+    /* 1:2の関係 ここは1 */
+    animation-duration: 0.5s; 
     animation-timing-function: ease;
     animation-fill-mode: forwards;
 }
@@ -103,9 +104,9 @@ body {
   }
 .FadeOutAppLogo {
     animation-name: fadeOutAppLogo;
-    animation-duration: 6s; 
+    /* 1:2の関係 ここは2 */
+    animation-duration: 1s; 
     animation-timing-function: ease;
-    /* animation-delay: 2s; */
     animation-fill-mode: forwards;
 }
 @keyframes fadeOutAppLogo{
