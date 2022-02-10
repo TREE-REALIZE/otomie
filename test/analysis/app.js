@@ -21,14 +21,16 @@ const micOnTouched = () => {
 
 
 window.addEventListener("load", () => {
-
+    let canvas = document.querySelector("canvas#A_canvasFrequency");
     document.querySelector("#TitleWindow").addEventListener("click", micOn);
     document.querySelector("#drawRealTime").addEventListener("click", drawRealTime);
     document.querySelector("#getArchive").addEventListener("click", getArchive);
     document.querySelector("#initRec").addEventListener("click", initRec);
     document.querySelector("#recording").addEventListener("click", recording);
     document.querySelector("#stopRec").addEventListener("click", stopRec);
-    document.querySelector("#play").addEventListener("click", play);
+    document.querySelector("#play").addEventListener("click", ()=>{
+        play(canvas,{});
+    });
     document.querySelector("#stopPlay").addEventListener("click", stopPlay);
     document.querySelector("#deleteData").addEventListener("click", deleteData);
 
@@ -69,7 +71,7 @@ const drawRealTime = (_canvas, {
     // ・
     // ・
     // ・
-    switchRealTime();
+    switchRealTime(_canvas);
     //console.log("drawRealTime:   " + drawRealTime);
 
     if (onReady && typeof onReady === "function") {
@@ -184,7 +186,7 @@ const stopRec = ({
 
 }
 
-const play = ({
+const play = (_canvas,{
     onReady = () => { },
     onProcess = () => { },
     onComplete = () => { },
@@ -195,7 +197,7 @@ const play = ({
     // ・
     // ・
     console.log("play");
-    playDataList();
+    playDataList(_canvas);
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }

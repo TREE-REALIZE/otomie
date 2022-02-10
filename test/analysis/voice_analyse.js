@@ -54,6 +54,8 @@ let A_canvasTimeDomain;
 let A_canvasSpectrogram;
 let A_canvas_S_Context;
 
+let targetCanvas;
+
 let audioAnalyser;
 
 
@@ -225,12 +227,14 @@ const decordeJsonDataList = (jsonData) => {
 
 
 //再生ボタンを押下したときに実行される関数．
-const playDataList = () => {
+const playDataList = (canvas) => {
     if (!isRecording) {
         if (!isPlaying) {
             isPlaying = true;
             dataIndex = -1;
             animateCanvases();
+            targetCanvas = canvas;
+
         }
     } else {
         return;
@@ -502,9 +506,9 @@ const animateCanvases = () => {
             }
             dataIndex = processIndex;
 
-            drawSpectCanvas(data, dataIndex, A_canvasFrequency);
-            drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
-            drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
+            drawSpectCanvas(data, dataIndex, targetCanvas);
+            //drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
+            //drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
 
 
             dataIndex += 1;
