@@ -44,6 +44,7 @@ const micOn = ({
     onReady = () => { },
     onComplete = () => { }
 } = {}) => {
+    console.log("micON called");
 
     //マイクをONにする処理
     startCollecting();
@@ -51,6 +52,7 @@ const micOn = ({
     if (onReady && typeof onReady === "function") {
         console.log("onReady && typeof onReady ");
         onReady(true);
+
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
