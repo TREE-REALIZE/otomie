@@ -20,24 +20,24 @@ const micOnTouched = () => {
 
 
 
-window.addEventListener("load", () => {
-    getCanvases();
+// window.addEventListener("load", () => {
+//     getCanvases();
 
-    document.querySelector("#TitleWindow").addEventListener("click", micOn);
-    document.querySelector("#drawRealTime").addEventListener("click", ()=>{drawRealTime(canvasFrequency,{})});
-    console.log("canvasFrequency:   " + canvasFrequency);
-    document.querySelector("#getArchive").addEventListener("click", getArchive);
-    document.querySelector("#initRec").addEventListener("click", initRec);
-    document.querySelector("#recording").addEventListener("click", recording);
-    document.querySelector("#stopRec").addEventListener("click", stopRec);
-    document.querySelector("#play").addEventListener("click", ()=>{play(A_canvasFrequency,{})});
-    document.querySelector("#stopPlay").addEventListener("click", stopPlay);
-    document.querySelector("#deleteData").addEventListener("click", deleteData);
+//     document.querySelector("#TitleWindow").addEventListener("click", micOn);
+//     document.querySelector("#drawRealTime").addEventListener("click", ()=>{drawRealTime(canvasFrequency,{})});
+//     console.log("canvasFrequency:   " + canvasFrequency);
+//     document.querySelector("#getArchive").addEventListener("click", getArchive);
+//     document.querySelector("#initRec").addEventListener("click", initRec);
+//     document.querySelector("#recording").addEventListener("click", recording);
+//     document.querySelector("#stopRec").addEventListener("click", stopRec);
+//     document.querySelector("#play").addEventListener("click", ()=>{play(A_canvasFrequency,{})});
+//     document.querySelector("#stopPlay").addEventListener("click", stopPlay);
+//     document.querySelector("#deleteData").addEventListener("click", deleteData);
 
-    //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
+//     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
 
-    console.log("load finish");
-});
+//     console.log("load finish");
+// });
 
 //◆ app.js
 const micOn = ({

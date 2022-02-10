@@ -92,24 +92,24 @@ let visual = {               //ビジュアル用に正規化
 };
 
 
-const getCanvases = () => {
-    canvasFrequency = document.querySelector('#CanvasRealTime');
-    canvasTimeline = document.querySelector('#canvasTimeline');    
-    canvasTimeDomain = document.querySelector('#canvasTimeDomain');
-    canvasSpectrogram = document.querySelector('#canvasSpectrogram');
+// const getCanvases = () => {
+//     canvasFrequency = document.querySelector('#CanvasRealTime');
+//     canvasTimeline = document.querySelector('#canvasTimeline');    
+//     canvasTimeDomain = document.querySelector('#canvasTimeDomain');
+//     canvasSpectrogram = document.querySelector('#canvasSpectrogram');
 
 
-    canvas_S_Context = canvasSpectrogram.getContext('2d');
-    canvas_S_Context.fillStyle = colorMap[0];
-    canvas_S_Context.fillRect(0, 0, canvasSpectrogram.width, canvasSpectrogram.height);
+//     canvas_S_Context = canvasSpectrogram.getContext('2d');
+//     canvas_S_Context.fillStyle = colorMap[0];
+//     canvas_S_Context.fillRect(0, 0, canvasSpectrogram.width, canvasSpectrogram.height);
 
-    A_canvasFrequency = document.querySelector('#CanvasRecMovie');
-    A_canvasTimeDomain = document.querySelector('#A_canvasTimeDomain');
-    A_canvasSpectrogram = document.querySelector('#A_canvasSpectrogram');
-    A_canvas_S_Context = A_canvasSpectrogram.getContext('2d');
-    A_canvas_S_Context.fillStyle = colorMap[0];
-    A_canvas_S_Context.fillRect(0, 0, A_canvasSpectrogram.width, A_canvasSpectrogram.height);
-};
+//     A_canvasFrequency = document.querySelector('#CanvasRecMovie');
+//     A_canvasTimeDomain = document.querySelector('#A_canvasTimeDomain');
+//     A_canvasSpectrogram = document.querySelector('#A_canvasSpectrogram');
+//     A_canvas_S_Context = A_canvasSpectrogram.getContext('2d');
+//     A_canvas_S_Context.fillStyle = colorMap[0];
+//     A_canvas_S_Context.fillRect(0, 0, A_canvasSpectrogram.width, A_canvasSpectrogram.height);
+// };
 
 
 //解析開始
