@@ -12,6 +12,15 @@
     appLogoGrp.addEventListener('animationend', splashNone);
 }
 
+// getArchiveステート判別用
+let State = {
+    isPrepared : 1,
+    isRecorded : 2,
+    isClickedReturn : 3,
+    isClickedDelete : 4
+};
+let nowState = State.isPrepared;
+
 // Howto画面
 {
     // Howto画面 - 画面クリックでスライド
@@ -36,7 +45,6 @@
     // マイクの設定カード押された関数
     const clickedMicOnCard = () => {
         micOn(micOnCallBack);
-        drawRealTime(drawRealTimeCallBack);
     };
     micOnCard.addEventListener('click', clickedMicOnCard);
 
@@ -71,7 +79,6 @@
 
     // Howto画面 - はじめましょう画面クリックで非表示して次へ
     const howToWindow = document.querySelector('#HowToWindow');
-
     const startCard = document.getElementById("StartCard");
     // はじめましょう画面がクリックされたら呼ぶ関数
     const clickedStartCard = () => {
@@ -88,17 +95,22 @@
         getNum: (num) => {
             if (num <= 0) {
                 console.log("getArchive-保存されているデータがありません");
-                // Howto画面が表示されてたら非表示(最初のみ)
-                if(howToWindow.classList.contains('Displaynone') == false){
+                if(nowState == State.isPrepared){ //準備完了なら
                     displayNoneStartCard(); //Howto画面非表示関数
+                } else if(nowState == State.isClickedDelete){ //削除ボタンが押されたら
+                    changeRecNow(); //収録状態にする
+                    toggleDeleteConfirm(); //削除確認ウインドウ閉じる
+                    nowState == State.isPrepared; //準備完了ステートに切替
                 }
             }
             else {
                 console.log("getArchive-保存されているデータがあります");
-                // 再生画面で戻るボタン押してgetArchive呼んだ際はこれ呼ぶ↓
-                changeRecIcon(); // アイコン状態にする関数呼ぶ
-                // 再生停止してアイコン画像欲しいからgetArchive呼んだ際はこれ呼ぶ↓
-                stopRecFunc(); //UI周りを収録停止状態に変化させる
+                if(nowState == State.isRecorded){ // 収録停止してアイコン画像欲しいからgetArchive呼んだら
+                    stopRecFunc(); //UI周りを収録停止状態に変化させる
+                }else if(nowState == State.isClickedReturn){ // 再生画面で戻るボタン押したら
+                    changeRecIcon(); // アイコン状態にする関数呼ぶ
+                    nowState == State.isRecorded; //収録完了ステートに切替
+                }
             }
         }
     };
@@ -160,6 +172,7 @@ const recClick = () => {
         initRec(initRecCallBack);
     } else { //収録中なら
         console.log('ストップ押された');
+        stopRec(stopRecCallBack); //収録停止
     }
 }
 buttonStartRec.addEventListener('click', recClick);
@@ -171,8 +184,7 @@ const initRecCallBack = {
             recording(recordingCallBack); //収録開始
         }
         else {
-            console.log("initRec-初期化がに失敗しました×");
-            stopRec(stopRecCallBack); //収録停止
+            console.log("initRec-初期化が失敗しました×");
         }
     }
 };
@@ -193,8 +205,10 @@ const recordingCallBack = {
             recCountText.textContent = recCount.toFixed(0);
         }
         // 10ミリ秒おきに繰り返す
-        let countRecTime = setInterval(changeCountNum, 10);
-        countRecTime; //カウントしなさい
+        const countRecTime = () =>{
+            setInterval(changeCountNum, 10);
+        }
+        countRecTime(); //カウントしなさい
         // 0未満なら
         if (recCount < 0) {
             console.log(" - 収録時間が0未満になりました");
@@ -209,6 +223,7 @@ const stopRecCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("stopRec-収録が停止されました〇");
+            nowState = State.isRecorded; //収録終了ステートに切替
             getArchive(getArchiveCallBack); //再生画面にサムネイル画像入れるため
         }
         else {
@@ -277,20 +292,15 @@ const CanvasRecMovie = document.getElementById('CanvasRecMovie');
 let isClickBtnBackToRecWindow = false; //戻るボタン押されたフラグ　押されたらtrue,再生画面に遷移してきたときfalse
 const changePlayerWindowFunc =()=> {
     changeRecPlayer(); //再生画面を再生状態に
-    if(isClickBtnBackToRecWindow){
-        isClickBtnBackToRecWindow = false;  //戻るボタンフラグ押されたOFF
-    }
 };
 CanvasRecMovie.addEventListener('click', changePlayerWindowFunc);
-
-isClickBtnBackToRecWindow = true; //戻るボタンフラグ押されたON
 
 // 〇〇〇〇再生画面 - 戻るボタン押してアイコン状態に -------------------------------------------
 // 戻るボタン押された関数
 let isSaveDataPlay = false; //再生中フラグ
 const btnBackToRecWindow = document.getElementById('ButtonBackToRecWindow');
 const clickedBackToRecWindowBtn =()=> {
-    isClickBtnBackToRecWindow = true; //戻るボタンフラグ押されたON
+    nowState = State.isClickedReturn; //戻るボタン押されたステートに切替
     if(!isSaveDataPlay){ //再生中でないなら
         getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
     }else{ //再生中なら
@@ -298,23 +308,48 @@ const clickedBackToRecWindowBtn =()=> {
     }
 };
 btnBackToRecWindow.addEventListener('click', clickedBackToRecWindowBtn);
-// 〇〇〇〇再生画面 - 右下削除ボタン押してポップアップ表示・非表示 ------------------------------------------
+// 〇〇〇〇再生画面 - 右下削除ボタン押してポップアップウインドウ表示・非表示 ------------------------------------------
 const btnDeleteMovie = document.getElementById('ButtonDeleteMovie');
 const deleteConfirmText = document.getElementById('DeleteConfirmText');
-// --- 確認ポップアップウインドウ表示・非表示
+// --- 確認ポップアップウインドウ表示・非表示切替関数
 const toggleDeleteConfirm =()=> {
     deleteConfirmText.classList.toggle('InactivePopupWindow');
     deleteConfirmText.classList.toggle('ActivePopupWindow');
 }
-btnDeleteMovie.addEventListener('click', toggleDeleteConfirm);
+btnDeleteMovie.addEventListener('click', clickedDeleteConfirmBtn);
+// --- 削除確認ボタン押したらまず呼ばれる関数
+const clickedDeleteConfirmBtn =()=> {
+    nowState = State.isClickedDelete; //削除ボタン押されたステートに切替
+    if(!isSaveDataPlay){ //再生中でないなら
+        toggleDeleteConfirm(); //削除確認ウインドウ表示
+    }else{ //再生中なら
+        stopPlaying(stopPlayingCallBack); //停止
+    }
+};
+
 // --- キャンセル押したら非表示
 const cancelText = document.getElementById('CancelText');
 cancelText.addEventListener('click', toggleDeleteConfirm);
 // --- 削除押したら再生画面を収録状態にする
 const deleteText = document.getElementById('DeleteText');
-deleteText.addEventListener('click', changeRecNow);
-deleteText.addEventListener('click', toggleDeleteConfirm);
+deleteText.addEventListener('click', clickedDeleteTextBtn);
 
+// 削除ボタン押されらまず呼ばれる関数
+const clickedDeleteTextBtn = () => {
+    deleteData(deleteDataCallBack);
+};
+// deleteDataコールバック
+const deleteDataCallBack = {
+    onReady: (tf) => {
+        if (tf == true) {
+            console.log("deleteData-削除が完了しました〇");
+            getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
+        }
+        else {
+            console.log("deleteData-削除が完了できませんでした×");
+        }
+    }
+};
 
 // 〇〇〇〇再生画面 - 再生/停止ボタン押してアイコン切替 -------------------------------------------
 const btnStartPlay = document.getElementById('ButtonStartPlay');
@@ -322,7 +357,7 @@ const changeMovieBtnIcon =()=> {
     btnStartPlay.classList.toggle('PlayMovieBtn');
     btnStartPlay.classList.toggle('StopMovieBtn');
 };
-
+// 〇〇〇〇再生画面 - 再生/停止ボタン押されたらまず呼ばれる関数
 const clickedPlayStopBtn =()=> {
     if(!isSaveDataPlay){ //再生中でないなら
         play(CanvasRecMovie, playCallBack); //再生
@@ -351,9 +386,13 @@ const stopPlayingCallBack = {
             console.log("stopPlaying-再生が停止されました〇");
             changeMovieBtnIcon(); //アイコン切替関数
             isSaveDataPlay = false; //再生中フラグOFF
-            // もし戻るボタンが押されていたらgetArchive呼ぶ
-            if(isClickBtnBackToRecWindow == true){
+            // もし戻るボタンが押されていたら
+            if(nowState == State.isClickedReturn){
+                nowState = State.isClickedReturn; //戻るボタン押されたステートに切替
                 getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
+            }else if(nowState == State.isClickedDelete){ // もし削除確認ボタンが押されていたら
+                changeMovieBtnIcon(); //アイコン切替関数
+                toggleDeleteConfirm(); //削除確認ウインドウ表示
             }
         }
         else {
