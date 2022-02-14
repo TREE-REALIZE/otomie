@@ -91,6 +91,30 @@ const displayNoneStartCard = () => {
 // はじめましょう画面クリックイベント
 startCard.addEventListener('click', clickedStartCard);
 
+// getArchiveコールバック
+const getArchiveCallBack = {
+    getNum: (num) => {
+        if (num <= 0) {
+            console.log("UI通知-getArchive-保存されているデータがありません");
+            if (nowState == State.isPrepared) { //準備完了なら
+                displayNoneStartCard(); //Howto画面非表示関数
+            } else if (nowState == State.isClickedDelete) { //削除ボタンが押されたら
+                changeRecNow(); //収録状態にする
+                toggleDeleteConfirm(); //削除確認ウインドウ閉じる
+                nowState == State.isPrepared; //準備完了ステートに切替
+            }
+        }
+        else {
+            console.log("UI通知-getArchive-保存されているデータがあります");
+            if (nowState == State.isRecorded) { // 収録停止してアイコン画像欲しいからgetArchive呼んだら
+                stopRecFunc(); //UI周りを収録停止状態に変化させる
+            } else if (nowState == State.isClickedReturn) { // 再生画面で戻るボタン押したら
+                changeRecIcon(); // アイコン状態にする関数呼ぶ
+                nowState == State.isRecorded; //収録完了ステートに切替
+            }
+        }
+    }
+};
 
 
 
@@ -374,31 +398,6 @@ const stopPlayingCallBack = {
         }
         else {
             console.log("UI通知-stopPlaying-再生が停止できませんでした×");
-        }
-    }
-};
-
-// getArchiveコールバック
-const getArchiveCallBack = {
-    getNum: (num) => {
-        if (num <= 0) {
-            console.log("UI通知-getArchive-保存されているデータがありません");
-            if (nowState == State.isPrepared) { //準備完了なら
-                displayNoneStartCard(); //Howto画面非表示関数
-            } else if (nowState == State.isClickedDelete) { //削除ボタンが押されたら
-                changeRecNow(); //収録状態にする
-                toggleDeleteConfirm(); //削除確認ウインドウ閉じる
-                nowState == State.isPrepared; //準備完了ステートに切替
-            }
-        }
-        else {
-            console.log("UI通知-getArchive-保存されているデータがあります");
-            if (nowState == State.isRecorded) { // 収録停止してアイコン画像欲しいからgetArchive呼んだら
-                stopRecFunc(); //UI周りを収録停止状態に変化させる
-            } else if (nowState == State.isClickedReturn) { // 再生画面で戻るボタン押したら
-                changeRecIcon(); // アイコン状態にする関数呼ぶ
-                nowState == State.isRecorded; //収録完了ステートに切替
-            }
         }
     }
 };
