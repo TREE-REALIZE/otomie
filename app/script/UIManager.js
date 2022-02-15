@@ -1,5 +1,12 @@
 'use strict';
 
+// スクロールを禁止にする関数
+function disableScroll(event) {
+    event.preventDefault();
+}
+document.addEventListener('touchmove', disableScroll, { passive: false });
+document.addEventListener('mousewheel', disableScroll, { passive: false });
+
 // スプラッシュ画面
 {
     // スプラッシュ画面 - アニメ終わりで非表示して次へ
@@ -224,6 +231,7 @@ const stopRecCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-stopRec-収録が停止されました〇");
+            defenceClick(); //画面の操作を一旦受け付けない状態に
             changeRecBtnColor(); //収録ボタン色青に変更(おせるよーの見た目)
             nowState = State.isRecorded; //収録終了ステートに切替
             getArchive(CanvasRecMovie, getArchiveCallBack); //再生画面にサムネイル画像入れるため
@@ -279,9 +287,10 @@ whiteFadePanelOver.addEventListener('animationend', () => {
     }
 });
 // 再生画面がアイコン状態になるアニメ終わったら呼ばれる
-recContainer.addEventListener('animationend', () => {
+recContainer.addEventListener('transitionend', () => {
     if (recContainer.classList.contains('RecIcon') == true) {
-        // 画面操作を受け付けない処理を実装したらこのタイミングで解除
+        console.log('UI通知- 操作できない解除')
+        removeDefenceClick(); // 画面操作を受け付けない処理を解除
     }
 });
 // 〇〇〇〇収録画面 - 収録ボタン関連処理 ---↑↑↑↑↑↑↑↑↑↑↑↑-----------------------------------------------------
@@ -402,8 +411,14 @@ const stopPlayingCallBack = {
     }
 };
 
-
-
+// 白フェード中等でクリックイベント抑止
+const clickDefence = document.getElementById('ClickDefence');
+const defenceClick =()=> {
+    clickDefence.classList.remove('Displaynone');
+};
+const removeDefenceClick =()=> {
+    clickDefence.classList.add('Displaynone');
+};
 
 
 
@@ -413,8 +428,8 @@ document.addEventListener('keypress', keypress_ivent);
 function keypress_ivent(e) {
     if (e.key === 'a' || e.key === 'A') {
         //Aキーが押された時の処理 //収録終了
-        recContainer.classList.remove('RecFinish');
-        recContainer.classList.add('RecIcon');
+        document.addEventListener('touchmove', disableScroll, { passive: false });
+        document.addEventListener('mousewheel', disableScroll, { passive: false });
     }
     if (e.key === 'b' || e.key === 'B') {
         //Bキーが押された時の処理 //左下アイコンタップ
@@ -430,6 +445,3 @@ function keypress_ivent(e) {
     }
     return false;
 }
-
-
-
