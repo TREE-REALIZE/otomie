@@ -401,10 +401,42 @@ body {
 #RecContainer.RecIcon #CanvasWaveFormPlay,
 #RecContainer.RecIcon #RecDateTime,
 #RecContainer.RecIcon #RecLocation,
-#RecContainer.RecIcon #PlayBottomCover {
+#RecContainer.RecIcon #PlayBottomCover,
+#RecContainer.RecIcon #ButtonStartPlayBack,
+#RecContainer.RecIcon #ButtonStartPlay,
+#RecContainer.RecIcon #ButtonBackToRecWindow,
+#RecContainer.RecIcon #ButtonDeleteMovie,
+#RecContainer.RecIcon #RecDateTime,
+#RecContainer.RecIcon #RecLocation {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     opacity: 0;
     width: 0px;
     height: 0px;
+}
+/* 戻る消すボタン共通 */
+#RecContainer.RecIcon #ButtonBackToRecWindow,
+#RecContainer.RecIcon #ButtonDeleteMovie {
+    line-height: 30px;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 0px;
+    color: rgb(230, 230, 230);
+}
+/* 日時場所共通 */
+#RecContainer.RecIcon #RecDateTime,
+#RecContainer.RecIcon #RecLocation {
+    line-height: 20px;
+    text-align: left;
+    font-family: sans-serif;
+    font-size: 0px;
+    color: rgb(127, 127, 127);
+}
+/* ボタン共通 */
+#RecContainer.RecIcon #ButtonStartPlayBack,
+#RecContainer.RecIcon #ButtonStartPlay{
+    border-radius: 50%;
 }
 /* 全パーツ共通トランジション */
 #RecContainer.RecIcon #WhiteFadePanelPlay,
@@ -442,7 +474,7 @@ body {
     left: 0;
     width: 100%;
     height: 120px;
-    background-color: rgb(255, 136, 136);
+    background-color: rgb(255, 225, 54);
 }
 /* 日時場所共通 */
 #RecContainer.RecPlayer #RecDateTime,
@@ -519,7 +551,7 @@ body {
     width: 12px;
     height: 45px;
     box-sizing: border-box;
-    background-color: rgb(255, 255, 255);;
+    background-color: rgb(255, 255, 255);
     content: "";
 }
 #RecContainer.RecPlayer #ButtonStartPlay.StopMovieBtn::before {

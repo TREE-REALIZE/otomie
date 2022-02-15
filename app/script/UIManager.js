@@ -222,6 +222,7 @@ const stopRecCallBack = {
             defenceClick(); //画面の操作を一旦受け付けない状態に
             changeRecBtnColor(); //収録ボタン色青に変更(おせるよーの見た目)
             nowState = State.isRecorded; //収録終了ステートに切替
+            recCountText.textContent = '';
             getArchive(CanvasRecMovie, getArchiveCallBack); //再生画面にサムネイル画像入れるため
         }
         else {
