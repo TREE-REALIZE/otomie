@@ -200,6 +200,7 @@ body {
 #CanvasWaveFormRec {
     position: absolute;
     bottom: 259px;
+    left: 0;
     width: 100%;
     height: 120px;
     background-color: rgb(255, 136, 136);
@@ -438,6 +439,7 @@ body {
 #RecContainer.RecPlayer #CanvasWaveFormPlay {
     position: absolute;
     bottom: 259px;
+    left: 0;
     width: 100%;
     height: 120px;
     background-color: rgb(255, 136, 136);
@@ -568,6 +570,12 @@ body {
 #OverWindow {
     z-index: 30;
     pointer-events: none;
+}
+#ClickDefence {
+    height: 100%;
+    width: 100%;
+    pointer-events: auto;
+    background-color:rgba(137, 43, 226, 0.315);
 }
 /* タイトルロゴ */
 #TitleLogo {
