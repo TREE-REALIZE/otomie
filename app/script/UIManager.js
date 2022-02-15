@@ -326,6 +326,8 @@ const toggleDeleteConfirm = () => {
 // --- 削除確認ボタン押したらまず呼ばれる関数
 const clickedDeleteConfirmBtn = () => {
     nowState = State.isClickedDelete; //削除ボタン押されたステートに切替
+    defenceClick(); //クリック抑止
+    grayBackColor(); //抑止板を灰色に
     if (!isSaveDataPlay) { //再生中でないなら
         toggleDeleteConfirm(); //削除確認ウインドウ表示
     } else { //再生中なら
@@ -336,7 +338,13 @@ btnDeleteMovie.addEventListener('click', clickedDeleteConfirmBtn);
 
 // --- キャンセル押したら非表示
 const cancelText = document.getElementById('CancelText');
-cancelText.addEventListener('click', toggleDeleteConfirm);
+// キャンセルボタン押されらまず呼ばれる関数
+const clickedCancelText = () => {
+    removeDefenceClick(); //クリック抑止解除
+    removeGrayBackColor(); //抑止板灰色を解除
+    toggleDeleteConfirm(); //ポップアップ非表示
+}
+cancelText.addEventListener('click', clickedCancelText);
 // 削除ボタン押されらまず呼ばれる関数
 const clickedDeleteTextBtn = () => {
     deleteData(deleteDataCallBack);
@@ -350,6 +358,8 @@ const deleteDataCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-deleteData-削除が完了しました〇");
+            removeDefenceClick(); //クリック抑止解除
+            removeGrayBackColor(); //抑止板灰色を解除
             getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
         }
         else {
@@ -416,7 +426,28 @@ const defenceClick =()=> {
 const removeDefenceClick =()=> {
     clickDefence.classList.add('Displaynone');
 };
+// クリック抑止板を灰色にするだけの関数
+const grayBackColor =()=> {
+    clickDefence.classList.add('GrayBackColor');
+};
+const removeGrayBackColor =()=> {
+    clickDefence.classList.remove('GrayBackColor');
+};
 
+
+// タッチ操作での拡大縮小禁止
+function no_scaling() {
+    document.addEventListener("touchmove", mobile_no_scroll, { passive: false });
+}
+no_scaling();
+// 拡大縮小禁止
+function mobile_no_scroll(event) {
+    // ２本指での操作の場合
+    if (event.touches.length >= 2) {
+        // デフォルトの動作をさせない
+        event.preventDefault();
+    }
+}
 
 
 // テスト用
@@ -442,3 +473,5 @@ function keypress_ivent(e) {
     }
     return false;
 }
+
+
