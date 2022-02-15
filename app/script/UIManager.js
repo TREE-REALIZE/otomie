@@ -208,22 +208,10 @@ const recordingCallBack = {
     },
     onProcess: (recCount) => {
         // 時間をテキストに入れる関数
-        // changeCountNum();
-        // const changeCountNum = () => {
-        //     recCountText.textContent = recCount.toFixed(0);
-        // }
-        // // 10ミリ秒おきに繰り返す
-        // const countRecTime = () =>{
-        //     setInterval(changeCountNum, 10);
-        // }
-        // countRecTime(); //カウントしなさい
-        // // 0未満なら
-        // if (recCount < 0) {
-        //     console.log(" - 収録時間が0未満になりました");
-        //     clearInterval(countRecTime); //カウントやめなさい
-        //     recCountText.textContent = ''; //収録ボタンの数字を空に
-        //     stopRec(stopRecCallBack); //収録停止
-        // }
+        const changeCountNum = () => {
+            recCountText.textContent = recCount.toFixed(0);
+        }
+        changeCountNum();
     }
 };
 // stopRecコールバック
