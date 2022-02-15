@@ -438,13 +438,31 @@ body {
 #RecContainer.RecIcon #ButtonStartPlay{
     border-radius: 50%;
 }
+/* 再生/停止ボタン - 再生ボタン状態 */
+#RecContainer.RecIcon #ButtonStartPlay.PlayMovieBtn::before {
+    position: absolute;
+    top: 50%;
+    left: 32.5%;
+    transform: translateY(-50%);
+    width: 0px;
+    height: 0px;
+    border: 0px solid transparent;
+    border-left: 0px solid transparent;
+    box-sizing: border-box;
+    content: "";
+}
 /* 全パーツ共通トランジション */
 #RecContainer.RecIcon #WhiteFadePanelPlay,
 #RecContainer.RecIcon #CanvasRecMovie,
 #RecContainer.RecIcon #CanvasWaveFormPlay,
 #RecContainer.RecIcon #RecDateTime,
 #RecContainer.RecIcon #RecLocation,
-#RecContainer.RecIcon #PlayBottomCover
+#RecContainer.RecIcon #PlayBottomCover,
+#RecContainer.RecIcon #ButtonStartPlayBack,
+#RecContainer.RecIcon #ButtonStartPlay,
+#RecContainer.RecIcon #ButtonBackToRecWindow,
+#RecContainer.RecIcon #ButtonDeleteMovie,
+#RecContainer.RecIcon #ButtonStartPlay.PlayMovieBtn::before
 {
     transition-duration: 1s;
 }

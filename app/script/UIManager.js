@@ -195,6 +195,8 @@ const initRecCallBack = {
         }
     }
 };
+// UI側のカウント定義(渡ってきた数値を逆にするため)
+const countUI = 5;
 // recordingコールバック
 const recordingCallBack = {
     onReady: (tf) => {
@@ -207,11 +209,9 @@ const recordingCallBack = {
         }
     },
     onProcess: (recCount) => {
-        // 時間をテキストに入れる関数
-        const changeCountNum = () => {
-            recCountText.textContent = recCount.toFixed(0);
-        }
-        changeCountNum();
+        // 時間をテキストに入れる
+        recCountText.textContent = (countUI - recCount).toFixed(0);
+        // recCountText.textContent = recCount.toFixed(0);
     }
 };
 // stopRecコールバック
@@ -291,8 +291,15 @@ const CanvasRecMovie = document.getElementById('CanvasRecMovie');
 let isClickBtnBackToRecWindow = false; //戻るボタン押されたフラグ　押されたらtrue,再生画面に遷移してきたときfalse
 const changePlayerWindowFunc = () => {
     changeRecPlayer(); //再生画面を再生状態に
+    defenceClick(); //クリック抑止
 };
 CanvasRecMovie.addEventListener('click', changePlayerWindowFunc);
+// 再生画面が再生状態になるアニメ終わったら呼ばれる
+recContainer.addEventListener('transitionend', () => {
+    if (recContainer.classList.contains('RecPlayer') == true) {
+        removeDefenceClick(); // 画面操作を受け付けない処理を解除
+    }
+});
 
 // 〇〇〇〇再生画面 - 戻るボタン押してアイコン状態に -------------------------------------------
 // 戻るボタン押された関数
@@ -300,6 +307,7 @@ let isSaveDataPlay = false; //再生中フラグ
 const btnBackToRecWindow = document.getElementById('ButtonBackToRecWindow');
 const clickedBackToRecWindowBtn = () => {
     nowState = State.isClickedReturn; //戻るボタン押されたステートに切替
+    defenceClick(); //クリック抑止
     if (!isSaveDataPlay) { //再生中でないなら
         getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
     } else { //再生中なら
