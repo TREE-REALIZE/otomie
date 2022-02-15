@@ -128,7 +128,14 @@ const getPrepareRec = () => {
         return false;
     }
 };
-const startRecording = () => {
+const startRecording = (
+    {
+        onReady = () => { },
+        onProcess = () => { },
+        onComplete = () => { },
+    } = {}
+) => {
+    onRecCB.onProcess = onProcess;
     //console.log("startRecorging");
     if (!isRecording) {
         isRecording = true;
@@ -150,6 +157,8 @@ const stopRecording = () => {
         startCollectingTime = 0;                             //時間をリセット
         data.dataList = dataList;
         archiveData(data);
+        console.log("stopRecording");
+        recTime = 0;
     }
 }
 
@@ -193,7 +202,7 @@ const stopDataList = () => {
     if (!isRecording) {
         if (isPlaying) {
             isPlaying = false;
-            //dataIndex = -1;
+            dataIndex = -1;
             //animateCanvases();
         }
     } else {
@@ -332,6 +341,9 @@ const shiftFrameDataObjList = () => {
 }
 
 
+let realTimeCB = {};
+let onRecCB = {};
+
 //解析用処理
 const analyseVoice = () => {
     fsDivN = audioContext.sampleRate / audioAnalyser.fftSize;           //周波数分解能
@@ -362,10 +374,11 @@ const analyseVoice = () => {
     let dataIndex = data["dataList"].length - 1;
     console.log("dataIndex" + dataIndex);
     calcFrequencyPeak(data, dataIndex);
-    countRecTime(audioDeltaTime);
-    judgeRecTime(afterStorageTime);
-    drawGraphs(realTimeCanvas, dataIndex);
 
+    countRecTime(audioDeltaTime,onRecCB);
+
+    drawGraphs(realTimeCanvas, dataIndex, realTimeCB);
+    judgeRecTime(afterStorageTime);
 }
 //オーディオ用のデルタ時間を計算
 const calcAudioDeltaTime = () => {
@@ -374,12 +387,21 @@ const calcAudioDeltaTime = () => {
 }
 
 //リアルタイム描画開始用のスイッチ
-const switchRealTime = (_canvas) => {
+
+const switchRealTime = (_canvas, {
+    onReady = () => { },
+    onProcess = () => { },
+    onComplete = () => { },
+}) => {
+    realTimeCB.onReady = onReady;
+    realTimeCB.onProcess = onProcess;
+    realTimeCB.onComplete = onComplete;
+
     if (isDrawRealTime == false) {
         isDrawRealTime = true;
         console.log("isDrawRealTime" + isDrawRealTime);
         setTargetCanvas(_canvas);
-        
+
     }
     else if (isDrawRealTime == true) {
         isDrawRealTime = false;
@@ -391,13 +413,19 @@ const setTargetCanvas = (_canvas) => {
     realTimeCanvas = _canvas;
 }
 
-const drawGraphs = (_canvas, _dataIndex,) => {
+const drawGraphs = (_canvas, _dataIndex, _realTimeCB) => {
     if (_canvas != null) {
         console.log("drawGraphs");
         if (isDrawRealTime == true) {
-            console.log("drawGraphs");
+
 
             drawSpectCanvas(data, _dataIndex, _canvas);
+            _realTimeCB.onProcess(isDrawRealTime);
+            console.log("isDrawRealTime:    " + isDrawRealTime)
+        }
+        else {
+            _realTimeCB.onProcess(isDrawRealTime);
+
         }
     } else {
         console.log("not drawGraphs");
@@ -408,9 +436,10 @@ const drawGraphs = (_canvas, _dataIndex,) => {
 
 
 //収録時間を計算
-const countRecTime = (_deltaTime) => {
+const countRecTime = (_deltaTime,_onRecCB) => {
     if (isRecording == true) {
         recTime += _deltaTime;
+        _onRecCB.onProcess(recTime);
         console.log("recTime" + recTime);
     }
     else {
@@ -423,6 +452,7 @@ const judgeRecTime = (_afterAtorageTime) => {
     if (recTime >= _afterAtorageTime) {
         console.log("recTime >= afterAtorageTime");
         stopRecording();
+        recTime = 0;
     }
     else {
         return;

@@ -131,7 +131,11 @@ const recording = ({
         onReady(true);
     }
     if (onProcess && typeof onProcess === "function") {
-        onProcess(recordingTime);
+        onProcess(1);
+        onProcess(2);
+        onProcess(3);
+        onProcess(4);
+        onProcess(5);
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
