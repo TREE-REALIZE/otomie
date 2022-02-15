@@ -44,6 +44,7 @@ const micOn = ({
     onReady = () => { },
     onComplete = () => { }
 } = {}) => {
+    console.log("micON called");
 
     //マイクをONにする処理
     startCollecting();
@@ -51,6 +52,7 @@ const micOn = ({
     if (onReady && typeof onReady === "function") {
         console.log("onReady && typeof onReady ");
         onReady(true);
+
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
@@ -145,13 +147,18 @@ const recording = ({
     // ・
     // ・
     // ・    
-    startRecording();
+    startRecording({onReady,onProcess,onComplete});
     
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
     if (onProcess && typeof onProcess === "function") {
-        onProcess(recTime);
+        // onProcess(recTime);
+        // onProcess(1);
+        // onProcess(2);
+        // onProcess(3);
+        // onProcess(4);
+        // onProcess(5);
     }
     if (onComplete && typeof onComplete === "function") {
         onComplete(true);
