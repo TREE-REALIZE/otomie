@@ -75,8 +75,14 @@ const drawRealTime = (_canvas, {
     // ・
     setCallBack(drawReatTimeCB,{onReady,onProcess,onComplete});
     // setCallBack()
-    switchRealTime(_canvas,drawReatTimeCB);
+    //switchRealTime(_canvas,drawReatTimeCB);
     //console.log("drawRealTime:   " + drawRealTime);
+    
+    // const otimieVisual = new OtomieVisual.OtomieVisual();
+    // console.log("otimieVisual",otimieVisual);
+    // otimieVisual.init(document.querySelector("#CanvasRealTime"), 640, 640);
+    // otimieVisual.render();
+
 
     if (onReady && typeof onReady === "function") {
         onReady(true);
@@ -166,6 +172,8 @@ const recording = ({
         onComplete(true);
     }
 }
+
+
 
 
 // //UIManager側
