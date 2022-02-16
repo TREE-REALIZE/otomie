@@ -23,7 +23,7 @@
             <div id="VersionText">Ver.β</div>
         </div>
     </div>
-    
+
     <!-- ハウトゥ画面 -->
     <div id="HowToWindow" class="Window">
         <div class="Slider">
@@ -50,10 +50,11 @@
     <div id="RecWindow" class="Window">
         <div id="TitleLogoRec"></div>
         <canvas id="CanvasRealTime"></canvas>
+        <div id="VisualRealTime"></div>
         <canvas id="CanvasWaveFormRec"></canvas>
         <div id="RecBottomCover">
             <div id="ButtonStartRecBack">
-                 <!-- ↓クラスの付け替えで状態(NormalRecBtn StartRecBtn)切り替え -->
+                <!-- ↓クラスの付け替えで状態(NormalRecBtn StartRecBtn)切り替え -->
                 <div id="ButtonStartRec" class="NormalRecBtn">
                     <div id="RecCountTextBack">
                         <div id="RecCountText"></div>
@@ -71,7 +72,7 @@
             <canvas id="CanvasRecMovie"></canvas>
             <canvas id="CanvasWaveFormPlay"></canvas>
             <div id="RecDateTime"><img src="images/TimeIcon.png"></i> 2022年12月22日 12:35</div>
-            <div id="RecLocation"><img src="images/LocationIcon.png"></i> 港区南麻布三丁目</div>        
+            <div id="RecLocation"><img src="images/LocationIcon.png"></i> 港区南麻布三丁目</div>
             <div id="PlayBottomCover">
                 <div id="ButtonStartPlayBack">
                     <!-- 再生/停止ボタン -->
@@ -89,13 +90,14 @@
         <div id="TitleLogo"><img src="images/TitleLogo.png"></div>
         <div id="ClickDefence" class="Displaynone"></div>
         <div id="WhiteFadePanelOver"></div>
-        <!-- ↓クラスの付け替えで状態(InactivePopupWindow ActivePopupWindow)切り替え -->   
+        <!-- ↓クラスの付け替えで状態(InactivePopupWindow ActivePopupWindow)切り替え -->
         <div id="DeleteConfirmText" class="InactivePopupWindow">収録データを削除しますか？
             <div id="DeleteText">削除</div>
             <div id="CancelText">キャンセル</div>
         </div>
     </div>
 
+    <script src="script/otomie-visual.js"></script>
     <script src="script/voice_analyse.js"></script>
     <script src="script/app.js"></script>
     <script src="script/UIManager.js"></script>
