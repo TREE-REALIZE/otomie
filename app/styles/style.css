@@ -208,7 +208,7 @@ body {
     z-index: 10;
 }
 
-/* 収録画面のグラフィック */
+/* 収録画面のグラフィックの親 */
 #CanvasRealTime {
     position: absolute;
     bottom: 418px;
@@ -217,6 +217,12 @@ body {
     height: 340px;
     border-radius: 30px;
     background-color: rgb(194, 194, 194);
+    overflow: hidden;
+}
+/* 収録画面のグラフィック */
+#CanvasRealTime>canvas {
+    width: 100%;
+    height: 100%;
 }
 
 #VisualRealTime {
@@ -397,6 +403,16 @@ body {
 #RecContainer.RecIcon,
 #RecContainer.RecPlayer {
     position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* 再生画面のグラフィックの親 */
+#CanvasRecMovie>canvas {
+    overflow: hidden;
+}
+/* 再生画面のグラフィック */
+#CanvasRecMovie>canvas {
     width: 100%;
     height: 100%;
 }
