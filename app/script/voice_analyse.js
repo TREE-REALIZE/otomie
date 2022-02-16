@@ -375,7 +375,7 @@ const analyseVoice = () => {
     console.log("dataIndex" + dataIndex);
     calcFrequencyPeak(data, dataIndex);
 
-    countRecTime(audioDeltaTime,onRecCB);
+    countRecTime(audioDeltaTime, onRecCB);
 
     drawGraphs(realTimeCanvas, dataIndex, realTimeCB);
     judgeRecTime(afterStorageTime);
@@ -436,7 +436,7 @@ const drawGraphs = (_canvas, _dataIndex, _realTimeCB) => {
 
 
 //収録時間を計算
-const countRecTime = (_deltaTime,_onRecCB) => {
+const countRecTime = (_deltaTime, _onRecCB) => {
     if (isRecording == true) {
         recTime += _deltaTime;
         _onRecCB.onProcess(recTime);
@@ -568,6 +568,9 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
 
 
     let rawData = _data["dataList"][_index]["raw"];         //描画処理する対象
+    let visualData = _data["dataList"][_index]["visual"];
+    // console.warn(_data["dataList"][_index])
+    otomieVisual.updateSoundData(visualData);
     let targetSpectDataList = rawData["frequency"];         //描画処理する対象の中の周波数データリスト
 
     for (let i = 0, len = targetSpectDataList.length; i < len; i++) {
