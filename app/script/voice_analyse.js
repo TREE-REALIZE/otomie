@@ -4,6 +4,11 @@
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
+
+console.log(OtomieVisual);
+
+
+
 //変数定義
 const beforeStorageTime = 1.0;                  //収録開始前保存する時間
 const afterStorageTime = 5.0;                   //収録開始後保存する時間上限
@@ -102,6 +107,8 @@ const medias = {
     audio: true,
     video: false
 };
+
+
 
 
 const prepareRec = (_initRecCB) => {
@@ -297,7 +304,10 @@ const startCollecting = (_micOnCB = {}) => {
     // };
 
     createJsonDataFormat();
+    
+    
     _micOnCB.onReady(true);
+
 
 
 
@@ -353,29 +363,34 @@ const createFrameDataObj = () => {
     visual.pitch = N_spectrumPeak;
     visual.volume = N_volume;
 
+    visual.roughness = 0;
+    visual.sharpness = 0;
+    visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+    visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+
     frameData.raw = raw;
     frameData.visual = visual;
-    createData();
+
+    
+    return frameData;
+
+    
+
 }
 
 //解析データをリストに積んでいく処理
-const createData = () => {
-    dataList.push(frameData);
-    startCollectingTime += frameData.deltaTime;
-    shiftFrameDataObjList();
-    data.dataList = dataList;
-}
+const createData = (_frameData) => {
+    dataList.push(_frameData);
+    startCollectingTime += _frameData.deltaTime;
 
-//1秒分のデータが保存されたらリストからシフトしていく処理
-const shiftFrameDataObjList = () => {
+    //1秒分のデータが保存されたらリストからシフトしていく処理
     if (startCollectingTime >= beforeStorageTime) {
         if (!isRecording) {
             dataList.shift();
         }
     }
-    console.log("dataList.length" + dataList.length);
+    data.dataList = dataList;
 }
-
 
 
 
@@ -403,13 +418,19 @@ const analyseVoice = () => {
     timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
-    createFrameDataObj();
+    let frameDataObj = createFrameDataObj();
+    createData(frameDataObj);
+
+
+
     let dataIndex = data["dataList"].length - 1;
     calcFrequencyPeak(data, dataIndex);
     calcVolumePeak(data, dataIndex);
 
     countRecTime(audioDeltaTime, onRecCB);
     judgeRecTime(afterStorageTime);
+
+
     drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
     drawRectangle(data,dataIndex,CanvasWaveFormRec);
     getVisualData(data,dataIndex);
@@ -459,6 +480,7 @@ const setCanvas = (_canvas) => {
 const drawRTGraphic = (_canvas, _data, _dataIndex, _drawReatTimeCB) => {
     if (_canvas != null) {
         if (isDrawRealTime == true) {
+
             drawSpectCanvas(_data, _dataIndex, _canvas);
             _drawReatTimeCB.onProcess(isDrawRealTime);
         }
@@ -599,7 +621,6 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
     let rawData = _data["dataList"][_index]["raw"];         //描画処理する対象
     let visualData = _data["dataList"][_index]["visual"];
     // console.warn(_data["dataList"][_index])
-    otomieVisual.updateSoundData(visualData);
     let targetSpectDataList = rawData["frequency"];         //描画処理する対象の中の周波数データリスト
 
     for (let i = 0, len = targetSpectDataList.length; i < len; i++) {
