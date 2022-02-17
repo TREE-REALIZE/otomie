@@ -560,15 +560,15 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
     targetCanvasContext.stroke();
 
     // x軸の線とラベル出力
-    let textYs = ['1.00', '0.50', '0.00'];
-    for (var i = 0, len = textYs.length; i < len; i++) {
-        let text = textYs[i];
-        let gy = (1 - parseFloat(text)) * targetCanvas.height;
-        // Draw grid (Y)
-        targetCanvasContext.fillRect(0, gy, targetCanvas.width, 1);
-        // Draw text (Y)
-        targetCanvasContext.fillText(text, 0, gy);
-    }
+    // let textYs = ['1.00', '0.50', '0.00'];
+    // for (var i = 0, len = textYs.length; i < len; i++) {
+    //     let text = textYs[i];
+    //     let gy = (1 - parseFloat(text)) * targetCanvas.height;
+    //     // Draw grid (Y)
+    //     targetCanvasContext.fillRect(0, gy, targetCanvas.width, 1);
+    //     // Draw text (Y)
+    //     targetCanvasContext.fillText(text, 0, gy);
+    // }
 }
 
 //波形データを描画
