@@ -304,8 +304,8 @@ const startCollecting = (_micOnCB = {}) => {
     // };
 
     createJsonDataFormat();
-    
-    
+
+
     _micOnCB.onReady(true);
 
 
@@ -371,10 +371,10 @@ const createFrameDataObj = () => {
     frameData.raw = raw;
     frameData.visual = visual;
 
-    
+
     return frameData;
 
-    
+
 
 }
 
@@ -432,8 +432,8 @@ const analyseVoice = () => {
 
 
     drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
-    drawRectangle(data,dataIndex,CanvasWaveFormRec);
-    getVisualData(data,dataIndex);
+    drawRectangle(data, dataIndex, CanvasWaveFormRec);
+    getVisualData(data, dataIndex);
 
 }
 //オーディオ用のデルタ時間を計算
@@ -443,7 +443,7 @@ const calcAudioDeltaTime = () => {
 }
 
 
-const getVisualData = (_data,_index) => {
+const getVisualData = (_data, _index) => {
     let visualData = _data["dataList"][_index]["visual"];
     console.log("visualData" + JSON.stringify(visualData));
     console.log("visualData", visualData);
@@ -620,8 +620,9 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
 
     let rawData = _data["dataList"][_index]["raw"];         //描画処理する対象
     let visualData = _data["dataList"][_index]["visual"];
-    // console.warn(_data["dataList"][_index])
     let targetSpectDataList = rawData["frequency"];         //描画処理する対象の中の周波数データリスト
+
+    otomieVisual.updateSoundData(visualData);
 
     for (let i = 0, len = targetSpectDataList.length; i < len; i++) {
         //canvasにおさまるように線を描画
@@ -775,7 +776,7 @@ const drawRectangle = (_data, _index, _canvas) => {
 
     let rawData = _data["dataList"][_index]["raw"];
     let timeDomainList = rawData["timeDomain"];
-    let peak = getVolumePeak(_data,_index)["volume"];
+    let peak = getVolumePeak(_data, _index)["volume"];
 
     let barWidth = 2;
     //let x = canvas.width / dataList.length;
