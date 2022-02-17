@@ -217,7 +217,9 @@ body {
     height: 340px;
     border-radius: 30px;
     overflow: hidden;
+    opacity: 0.5;
 }
+
 /* 収録画面のグラフィック */
 #CanvasRealTime>canvas {
     width: 100%;
@@ -226,11 +228,13 @@ body {
 
 #VisualRealTime {
     position: absolute;
-    left: 428px;
-    width: 640px;
-    height: 640px;
+    bottom: 418px;
+    left: 44px;
+    width: 340px;
+    height: 340px;
     border-radius: 30px;
     background-color: rgb(194, 194, 194);
+    overflow: hidden;
 }
 
 #VisualRealTime>canvas {
@@ -346,6 +350,7 @@ body {
 #CanvasRecMovie>canvas {
     overflow: hidden;
 }
+
 /* 再生画面のグラフィック */
 #CanvasRecMovie>canvas {
     width: 100%;

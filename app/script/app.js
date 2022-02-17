@@ -75,7 +75,7 @@ const drawRealTime = (_canvas, {
     // ・
     setCallBack(drawReatTimeCB,{onReady,onProcess,onComplete});
     // setCallBack()
-    //switchRealTime(_canvas,drawReatTimeCB);
+    switchRealTime(_canvas,drawReatTimeCB);
     //console.log("drawRealTime:   " + drawRealTime);
     
     // const otimieVisual = new OtomieVisual.OtomieVisual();
