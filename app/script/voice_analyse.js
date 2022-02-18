@@ -768,13 +768,6 @@ const calcVolumePeak = (_data, _index) => {
     // return peak;
 }
 
-const visual{
-    hue, saturation,
-    value,
-    objectCount,
-    objectShape
-    speed,
-}
 
 const getVolumePeak = (_data, _index) => {
     let peak = -100;
