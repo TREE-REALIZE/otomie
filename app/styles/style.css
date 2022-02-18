@@ -2,7 +2,11 @@
 
 /* 位置、組み、サイズ、形、線、色 */
 
-
+/*  */
+#Graphic {
+    width: 100%;
+    height: 100%;
+}
 body {
     position: relative;
 
@@ -139,7 +143,7 @@ body {
 }
 
 /* 収録画面のグラフィックの親 */
-#CanvasRealTime {
+#GraphicRec {
     position: absolute;
     bottom: 418px;
     left: 44px;
@@ -147,7 +151,7 @@ body {
     height: 340px;
     border-radius: 30px;
     overflow: hidden;
-    opacity: 0.5;
+    /* opacity: 0.5; */
 }
 
 /* 収録画面のグラフィック */
@@ -156,16 +160,16 @@ body {
     height: 100%;
 }
 
-#VisualRealTime {
+/* #VisualRealTime {
     position: absolute;
     bottom: 418px;
     left: 44px;
     width: 340px;
     height: 340px;
     border-radius: 30px;
-    background-color: rgb(194, 194, 194);
-    overflow: hidden;
-}
+    /* background-color: rgb(194, 194, 194); */
+    /* overflow: hidden;
+} */ 
 
 #VisualRealTime>canvas {
     width: 100%;

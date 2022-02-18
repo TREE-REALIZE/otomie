@@ -2,6 +2,7 @@
 
 const otomieVisual = new OtomieVisual();
 
+
 // スクロールを禁止にする関数
 function disableScroll(event) {
     event.preventDefault();
@@ -265,6 +266,7 @@ const initFadeAnim = () => {
 }
 // ----- 収録停止ボタンがおされたら呼ぶ処理まとめた関数
 function stopRecFunc() {
+    document.getElementById("CanvasRecMovie").pause();
     initFadeAnim(); // 初期化関数
     whiteFadePanelOver.classList.add('FadeOutWhiteOverAnim'); // フェードアウトAnimクラス足す
     isRecPlay = false; //収録中フラグOFF
@@ -384,8 +386,10 @@ const changeMovieBtnIcon = () => {
 const clickedPlayStopBtn = () => {
     if (!isSaveDataPlay) { //再生中でないなら
         play(CanvasRecMovie, playCallBack); //再生
+        document.getElementById("CanvasRecMovie").play();
     } else { //再生中なら
         stopPlaying(stopPlayingCallBack); //停止
+        document.getElementById("CanvasRecMovie").pause();
     }
 };
 btnStartPlay.addEventListener('click', clickedPlayStopBtn);

@@ -46,8 +46,12 @@
     <!-- 収録画面 -->
     <div id="RecWindow" class="Window">
         <div id="TitleLogoRec"></div>
-        <div id="VisualRealTime"></div>
-        <canvas id="CanvasRealTime"></canvas>
+        <video src="images/movieA.mp4" alt="チェック用" loop autoplay muted id="GraphicRec"></video>
+        <!-- <img src="images/Graphic.png" alt="チェック用" id="GraphicRec"> -->
+        <!-- <div id="VisualRealTime"></div>
+        <canvas id="CanvasRealTime"> -->
+        <!-- </canvas> -->
+        <img src="images/wave.png" alt="チェック用" id="CanvasWaveFormRec">
         <canvas id="CanvasWaveFormRec"></canvas>
         <div id="RecBottomCover">
             <div id="ButtonStartRecBack">
@@ -66,8 +70,11 @@
         <!-- ↓クラスの付け替えで状態(RecNow RecFinish RecIcon RecPlayer)切り替え -->
         <div id="RecContainer" class="RecNow">
             <div id="WhiteFadePanelPlay"></div>
-            <div id="CanvasRecMovie"></div>
-            <canvas id="CanvasWaveFormPlay"></canvas>
+            <!-- <div id="CanvasRecMovie"></div> -->
+            <video src="images/movieB.mp4" alt="チェック用" loop autoplay muted id="CanvasRecMovie"></video>>
+            <!-- <img src="images/Graphic.png" alt="チェック用" id="CanvasRecMovie"> -->
+            <!-- <canvas id="CanvasWaveFormPlay"></canvas> -->
+            <img src="images/wave.png" alt="チェック用" id="CanvasWaveFormPlay">
             <div id="RecDateTime"><img src="images/TimeIcon.png"></i> 2022年12月22日 12:35</div>
             <div id="RecLocation"><img src="images/LocationIcon.png"></i> 港区南麻布三丁目</div>
             <div id="PlayBottomCover">
