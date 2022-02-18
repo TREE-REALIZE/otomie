@@ -1,18 +1,14 @@
 
-
 // クロスブラウザ定義
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-
 console.log(OtomieVisual);
-
-
 
 //変数定義
 const beforeStorageTime = 1.0;                  //収録開始前保存する時間
 const afterStorageTime = 5.0;                   //収録開始後保存する時間上限
 
+const pitchMax = 4000.0;
+const pitchMin = 27.0;
 //時間系
 let startTime;
 let audioTime;
@@ -29,8 +25,8 @@ let audioData = [];                             //バッファデータをPush�
 let spectrums;                                  //周波数ごとのデータを保存する配列
 let spectrumPeak;                               //周波数のピークの値
 let N_spectrumPeak;                             //周波数のピークの値(正規化)
-let volume;                                     //周波数のピークの値
-let N_volume;                                   //周波数のピークの値(正規化)
+let volumePeak;                                     //周波数のピークの値
+let N_volumePeak;                                   //周波数のピークの値(正規化)
 let timeDomainArray;                            //時間領域ごとのデータを保存する配列
 let audioDeltaTime;                             //オーディオ処理ごとのデルタタイム用変数
 
@@ -41,7 +37,6 @@ let isPlaying = false;                          //再生中
 
 //描画スイッチ
 let isDrawRealTime = false;
-
 
 //キャンバス要カラーマップ作製
 const colorMap = generateColorMap({ r: 0, g: 0, b: 255 }, { r: 0, g: 255, b: 0 });
@@ -62,7 +57,6 @@ let A_canvas_S_Context;
 let realTimeCanvas;
 
 let audioAnalyser;
-
 
 let dataIndex = 0;              //再生中dataListを順に見るためのIndex
 
@@ -304,15 +298,7 @@ const startCollecting = (_micOnCB = {}) => {
     // };
 
     createJsonDataFormat();
-
-
     _micOnCB.onReady(true);
-
-
-
-
-
-
 };
 
 
@@ -334,48 +320,88 @@ const createJsonDataFormat = () => {
                     roughness: 0.0,     //(float)
                 },
                 visual: {               //ビジュアル用に正規化
-                    volume: 0.0,        //(float)     【0－1】
-                    pitch: 0.0,         //(float)     【0－1】
-                    sharpness: 0.0,     //(float)     【0－1】
-                    roughness: 0.0,     //(float)     【0－1】     
+                    hue:0.0,
+                    saturation:0.0,
+                    brightness:0.0,
+                    objectCount:0.0,
+                    objectShape:0.0,
+                    speed:0.0,   
                 }
             }
         ],//rawDataList
     }
 }
 
+
+
+//音の生データ，FFTデータを1回の解析ごとに保存していく処理．
 //音の生データ，FFTデータを1回の解析ごとに保存していく処理．
 const createFrameDataObj = () => {
     //ビジュアル要データオブジェクトにデータを格納
-    frameData = {};
+    let frameData = {};
     frameData.deltaTime = audioDeltaTime;
 
     raw = {};
+    visual = {};
+
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
-    //console.log("raw.timeDomain" + raw.timeDomain);
-
     raw.frequency = Object.values(spectrums);
     raw.pitch = spectrumPeak;
-    raw.volume = volume;
+    raw.volume = volumePeak;
 
-    visual = {};
-    visual.pitch = N_spectrumPeak;
-    visual.volume = N_volume;
+    let pitch = 0;
+    let volume = 0;
+    let roughness = 0;
+    let sharpness = 0;
 
-    visual.roughness = 0;
-    visual.sharpness = 0;
-    visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
-    visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+    visual.hue = 0;
+    visual.saturation = 0;
+    visual.brightness = 0;
+    visual.objectCount = 0;
+    visual.objectShape = 0;
+    visual.speed = 0;
+
+    // visual.pitch = N_spectrumPeak;
+
+    pitch = Math.min(pitchMax, Math.max(spectrumPeak, pitchMin));   //クリッピング
+    pitch = (pitch - pitchMin) / (pitchMax - pitchMin);             //正規化
+
+    volume = N_volumePeak;
+
+    sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+
+    roughness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+
+    visual.hue = calcHue(sharpness);
+    visual.saturation = volume;
+    visual.brightness = pitch;
+    visual.objectCount = calcObjectCount(pitch, volume);
+    visual.objectShape = sharpness;
+    visual.speed = pitch;
 
     frameData.raw = raw;
     frameData.visual = visual;
 
-
+    console.log("frameData", frameData);
     return frameData;
 
+}
 
+const calcHue = (_sharpness) => {
+    // const { sharpness, volume, pitch } = this.soundData;
+    let hue = 360 * (Math.abs(_sharpness - 0.5) * 2) / 360;
+    // let rgb = this.hsvToRgb(hue, volume, pitch);
+    // this.drawInfo.colorMain = PIXI.utils.rgb2hex(rgb);
+    // rgb = this.hsvToRgb(hue, volume, pitch * 0.7);
+    // this.drawInfo.colorSub = PIXI.utils.rgb2hex(rgb);
+    return hue;
+}
 
+const calcObjectCount = (_pitch, _volume) => {
+    // const { pitch, volume } = this.soundData;
+    let rate = (_pitch + -1 * _volume + 1) * 0.5;
+    return rate;
 }
 
 //解析データをリストに積んでいく処理
@@ -418,19 +444,16 @@ const analyseVoice = () => {
     timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
-    let frameDataObj = createFrameDataObj();
-    createData(frameDataObj);
-
-
 
     let dataIndex = data["dataList"].length - 1;
     calcFrequencyPeak(data, dataIndex);
     calcVolumePeak(data, dataIndex);
 
+    let frameDataObj = createFrameDataObj();                            //1フレーム分のデータ生成
+    createData(frameDataObj);
+
     countRecTime(audioDeltaTime, onRecCB);
     judgeRecTime(afterStorageTime);
-
-
     drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
     drawRectangle(data, dataIndex, CanvasWaveFormRec);
     getVisualData(data, dataIndex);
@@ -452,7 +475,7 @@ const getVisualData = (_data, _index) => {
 
 //リアルタイム描画開始用のスイッチ
 
-const switchRealTime = (_canvas) => {
+const switchRealTime = (_canvas, _drawReatTimeCB) => {
     // realTimeCB.onReady = onReady;
     // realTimeCB.onProcess = onProcess;
     // realTimeCB.onComplete = onComplete;
@@ -463,9 +486,6 @@ const switchRealTime = (_canvas) => {
         setCanvas(_canvas);
 
         //◇リアルタイム描画開始処理
-
-
-
     }
     else if (isDrawRealTime == true) {
         isDrawRealTime = false;
@@ -635,24 +655,24 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
         }
         let f = Math.floor(i * fsDivN);                                     // index -> frequency;
 
-        if ((f % 500) === 0) {                                              // 500 Hz単位にy軸の線とラベル出力
-            let text = (f < 1000) ? (f + ' Hz') : ((f / 1000) + ' kHz');
-            targetCanvasContext.fillRect(x, 0, 1, targetCanvas.height);     // Draw grid (X)
-            targetCanvasContext.fillText(text, x, targetCanvas.height);     // Draw text (X)
-        }
+        // if ((f % 500) === 0) {                                              // 500 Hz単位にy軸の線とラベル出力
+        //     let text = (f < 1000) ? (f + ' Hz') : ((f / 1000) + ' kHz');
+        //     targetCanvasContext.fillRect(x, 0, 1, targetCanvas.height);     // Draw grid (X)
+        //     targetCanvasContext.fillText(text, x, targetCanvas.height);     // Draw text (X)
+        // }
     }
     targetCanvasContext.stroke();
 
     // x軸の線とラベル出力
-    let textYs = ['1.00', '0.50', '0.00'];
-    for (var i = 0, len = textYs.length; i < len; i++) {
-        let text = textYs[i];
-        let gy = (1 - parseFloat(text)) * targetCanvas.height;
-        // Draw grid (Y)
-        targetCanvasContext.fillRect(0, gy, targetCanvas.width, 1);
-        // Draw text (Y)
-        targetCanvasContext.fillText(text, 0, gy);
-    }
+    // let textYs = ['1.00', '0.50', '0.00'];
+    // for (var i = 0, len = textYs.length; i < len; i++) {
+    //     let text = textYs[i];
+    //     let gy = (1 - parseFloat(text)) * targetCanvas.height;
+    //     // Draw grid (Y)
+    //     targetCanvasContext.fillRect(0, gy, targetCanvas.width, 1);
+    //     // Draw text (Y)
+    //     targetCanvasContext.fillText(text, 0, gy);
+    // }
 }
 
 //波形データを描画
@@ -735,19 +755,17 @@ const calcFrequencyPeak = (_data, _index) => {
 //振幅のピークを計算
 const calcVolumePeak = (_data, _index) => {
     let peak = -100;
-
     for (let i = 0, len = _data["dataList"][_index]["raw"]["timeDomain"].length; i < len; i++) {
         const sample = _data["dataList"][_index]["raw"]["timeDomain"][i];
         if (sample > peak) {
             peak = sample;
-            volume = peak;
-            N_volume = volume / 255;
-            volObj = { volume, N_volume };
+            volumePeak = peak;
+            N_volumePeak = peak / 255;
+            //volObj = { volume, N_volume };
         }
     }
-
-    // return peak;
 }
+
 
 const getVolumePeak = (_data, _index) => {
     let peak = -100;
@@ -894,3 +912,8 @@ const endRecording = function () {
     isCollecting = false;
     //audioDataをサーバに送信するなど終了処理
 };
+
+
+const debugLog = (text) => {
+    console.log(text);
+}
