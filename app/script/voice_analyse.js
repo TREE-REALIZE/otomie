@@ -13,6 +13,8 @@ console.log(OtomieVisual);
 const beforeStorageTime = 1.0;                  //収録開始前保存する時間
 const afterStorageTime = 5.0;                   //収録開始後保存する時間上限
 
+const pitchMax = 4000.0;
+const pitchMin = 27.0;
 //時間系
 let startTime;
 let audioTime;
@@ -345,36 +347,54 @@ const createJsonDataFormat = () => {
 }
 
 //音の生データ，FFTデータを1回の解析ごとに保存していく処理．
+//音の生データ，FFTデータを1回の解析ごとに保存していく処理．
 const createFrameDataObj = () => {
     //ビジュアル要データオブジェクトにデータを格納
-    frameData = {};
+    let frameData = {};
     frameData.deltaTime = audioDeltaTime;
 
     raw = {};
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
-    //console.log("raw.timeDomain" + raw.timeDomain);
+    //debugLog("raw.timeDomain" + raw.timeDomain);
 
     raw.frequency = Object.values(spectrums);
     raw.pitch = spectrumPeak;
     raw.volume = volume;
 
     visual = {};
-    visual.pitch = N_spectrumPeak;
-    visual.volume = N_volume;
-
+    visual.pitch = 0;
+    visual.volume = 0;
     visual.roughness = 0;
     visual.sharpness = 0;
-    visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
-    visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+
+    // visual.pitch = N_spectrumPeak;
+    let pitchVal = 0;//getNormalValue(getClipValue(spectrumPeak, pitchMax, pitchMin), pitchMax, pitchMin);
+    pitchVal = Math.min(pitchMax, Math.max(spectrumPeak, pitchMin));
+    pitchVal = (pitchVal - pitchMin) / (pitchMax - pitchMin);
+
+    debugLog("pitchVal:", pitchVal);
+
+
+    visual.pitch = pitchVal;
+    // visual.pitch = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+
+    debugLog("visual.pitch", visual.pitch);
+
+    //visual.pitch = 1;
+    visual.volume = 1;
+
+
+    visual.roughness = 0;
+    visual.sharpness = 1;
+    // visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+    // visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+
 
     frameData.raw = raw;
     frameData.visual = visual;
 
-
     return frameData;
-
-
 
 }
 
@@ -418,14 +438,13 @@ const analyseVoice = () => {
     timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
-    let frameDataObj = createFrameDataObj();
-    createData(frameDataObj);
-
-
 
     let dataIndex = data["dataList"].length - 1;
     calcFrequencyPeak(data, dataIndex);
     calcVolumePeak(data, dataIndex);
+
+    let frameDataObj = createFrameDataObj();
+    createData(frameDataObj);
 
     countRecTime(audioDeltaTime, onRecCB);
     judgeRecTime(afterStorageTime);
@@ -749,6 +768,14 @@ const calcVolumePeak = (_data, _index) => {
     // return peak;
 }
 
+const visual{
+    hue, saturation,
+    value,
+    objectCount,
+    objectShape
+    speed,
+}
+
 const getVolumePeak = (_data, _index) => {
     let peak = -100;
     let volume;
@@ -894,3 +921,8 @@ const endRecording = function () {
     isCollecting = false;
     //audioDataをサーバに送信するなど終了処理
 };
+
+
+const debugLog = (text) => {
+    console.log(text);
+}
