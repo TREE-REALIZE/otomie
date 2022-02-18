@@ -35,7 +35,8 @@ window.addEventListener("load", () => {
     document.querySelector("#deleteData").addEventListener("click", deleteData);
 
     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
-
+    otomieVisual.setup(document.querySelector("#Graphic"), 640, 640);
+    otomieVisual.play();
     console.log("load finish");
 });
 
@@ -177,12 +178,12 @@ const recording = ({
 
 
 // //UIManager側
-// const setRecTime = () => {
-//     element = document.querySelector('#recTime');
-//     element.value = recTime;
-// };
+const setRecTime = () => {
+    element = document.querySelector('#recTime');
+    element.value = recTime;
+};
 
-// setInterval(setRecTime, 10);
+setInterval(setRecTime, 10);
 
 
 

@@ -5,8 +5,7 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 
 
-//console.log(OtomieVisual);
-
+const otomieVisual = new OtomieVisual.OtomieVisual();
 
 
 //変数定義
@@ -107,11 +106,15 @@ const medias = {
     video: false
 };
 
+const pitchMax = 4000.0;
+const pitchMin = 27.0;
+
 
 
 const getCanvases = () => {
+    graphicContainer = document.querySelector("#Graphic");
     canvasFrequency = document.querySelector('#CanvasRealTime');
-    canvasTimeline = document.querySelector('#canvasTimeline');    
+    canvasTimeline = document.querySelector('#CanvasWaveFormRec');
     canvasTimeDomain = document.querySelector('#canvasTimeDomain');
     canvasSpectrogram = document.querySelector('#canvasSpectrogram');
 
@@ -151,10 +154,11 @@ const startRecording = () => {
         data.time = new Date();
         data.samplingRate = audioCtx.sampleRate;
         data.fsDivN = fsDivN;
-        console.log("data:     " + data.time);
+        debugLog("data:     " + data.time);
         onRecCB.onReady(true);
         //onRecCB.onComplete(true);
     }
+
 };
 
 const stopRecording = () => {
@@ -163,8 +167,8 @@ const stopRecording = () => {
         startCollectingTime = 0;                             //時間をリセット
         data.dataList = dataList;
         archiveData(data);
-        console.log("stopRecording");
-        recTime = 0;
+        debugLog("stopRecording");
+        //recTime = 0;
         getPCMData(playingData);
     }
 }
@@ -178,7 +182,7 @@ const getPCMData = (_playingData) => {
 
 
     }
-    console.log("PCMData", PCMData);
+    debugLog("PCMData", PCMData);
 
 }
 
@@ -219,7 +223,7 @@ const archiveData = (_data) => {
 
 //受けとったJsonデータをオブジェクトにへんかんする．
 const decordeJsonDataList = (jsonData) => {
-    console.log("jsonData" + jsonData);
+    debugLog("jsonData" + jsonData);
     playingData = JSON.parse(jsonData);
 }
 
@@ -250,7 +254,7 @@ const stopDataList = () => {
         if (isPlaying) {
             isPlaying = false;
             dataIndex = -1;
-            
+
 
             //◇収録データの再生を停止
 
@@ -273,8 +277,8 @@ const onAudioProcess = (e) => {
     // 音声のバッファを作成，インプットデータを保存
     let input = e.inputBuffer.getChannelData(0);    //PCMデータ：信号の強度が格納されている.
     bufferData = new Float32Array(input);
-    audioData.push(bufferData);                     //オーディオデータにバッファデータを積んでいく
-    //console.log("audioData",audioData);
+    //audioData.push(bufferData);                     //オーディオデータにバッファデータを積んでいく
+    //debugLog("audioData",audioData);
     analyseVoice();
 };
 
@@ -288,7 +292,7 @@ const setCallBack = (_obj = {}, _CBObj = {}) => {
 
 const startCollecting = (_micOnCB = {}) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    console.log("startCollecting");
+    debugLog("startCollecting");
     // サンプルレートを保持しておく
     isCollecting = true;
     const promise = navigator.mediaDevices.getUserMedia(medias);
@@ -319,16 +323,13 @@ const startCollecting = (_micOnCB = {}) => {
     };
     // function error(e) {
     //     alert(e);
-    //     console.log(e);
+    //     debugLog(e);
     // };
 
     createJsonDataFormat();
-    
-    
+
+
     _micOnCB.onReady(true);
-
-
-
 
 
 
@@ -366,34 +367,51 @@ const createJsonDataFormat = () => {
 //音の生データ，FFTデータを1回の解析ごとに保存していく処理．
 const createFrameDataObj = () => {
     //ビジュアル要データオブジェクトにデータを格納
-    frameData = {};
+    let frameData = {};
     frameData.deltaTime = audioDeltaTime;
 
     raw = {};
     raw.PCM = Object.values(bufferData);
     raw.timeDomain = Object.values(timeDomainArray);
-    //console.log("raw.timeDomain" + raw.timeDomain);
+    //debugLog("raw.timeDomain" + raw.timeDomain);
 
     raw.frequency = Object.values(spectrums);
     raw.pitch = spectrumPeak;
     raw.volume = volume;
 
     visual = {};
-    visual.pitch = N_spectrumPeak;
-    visual.volume = N_volume;
-
+    visual.pitch = 0;
+    visual.volume = 0;
     visual.roughness = 0;
     visual.sharpness = 0;
-    visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
-    visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+
+    // visual.pitch = N_spectrumPeak;
+    let pitchVal = 0;//getNormalValue(getClipValue(spectrumPeak, pitchMax, pitchMin), pitchMax, pitchMin);
+    pitchVal = Math.min(pitchMax, Math.max(spectrumPeak, pitchMin));
+    pitchVal = (pitchVal - pitchMin) / (pitchMax - pitchMin);
+
+    debugLog("pitchVal:", pitchVal);
+
+
+    visual.pitch = pitchVal;
+    // visual.pitch = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+
+    debugLog("visual.pitch", visual.pitch);
+
+    //visual.pitch = 1;
+    visual.volume = 1;
+
+
+    visual.roughness = 0;
+    visual.sharpness = 1;
+    // visual.sharpness = Math.abs(Math.sin((performance.now() / 1000) * 0.1));
+    // visual.roughness = Math.abs(Math.sin((performance.now() / 1000) * 1));
+
 
     frameData.raw = raw;
     frameData.visual = visual;
 
-    
     return frameData;
-
-    
 
 }
 
@@ -437,22 +455,30 @@ const analyseVoice = () => {
     timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
     audioAnalyser.getByteTimeDomainData(timeDomainArray);               //時間領域の振幅データを配列に格納    
 
+
+    let dataIndex = data["dataList"].length - 1;
+    calcVolumePeak(data, dataIndex);
+    calcFrequencyPeak(data, dataIndex);
+
+    debugLog(otomieVisual.drawInfo);
     let frameDataObj = createFrameDataObj();
     createData(frameDataObj);
 
 
+    otomieVisual.updateSoundData(frameDataObj["visual"]);
 
-    let dataIndex = data["dataList"].length - 1;
-    calcFrequencyPeak(data, dataIndex);
-    calcVolumePeak(data, dataIndex);
 
     countRecTime(audioDeltaTime, onRecCB);
     judgeRecTime(afterStorageTime);
 
 
-    drawRTGraphic(realTimeCanvases, data, dataIndex, drawReatTimeCB);
-    drawTimeLine(, data, dataIndex, drawReatTimeCB);
-    getVisualData(data,dataIndex);
+    //drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
+    drawSpectCanvas(data, dataIndex, canvasFrequency);
+    drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
+    drawRectangle(data,dataIndex,canvasTimeline);
+    drawSpectrogram(data,dataIndex,canvasSpectrogram);
+    //drawTimeLine(, data, dataIndex, drawReatTimeCB);
+    //getVisualData(data, dataIndex);
 
 }
 //オーディオ用のデルタ時間を計算
@@ -462,10 +488,10 @@ const calcAudioDeltaTime = () => {
 }
 
 
-const getVisualData = (_data,_index) => {
+const getVisualData = (_data, _index) => {
     let visualData = _data["dataList"][_index]["visual"];
-    console.log("visualData" + JSON.stringify(visualData));
-    console.log("visualData", visualData);
+    debugLog("visualData" + JSON.stringify(visualData));
+    debugLog("visualData", visualData);
     return visualData;
 }
 
@@ -478,7 +504,7 @@ const switchRealTime = (_canvas) => {
 
     if (isDrawRealTime == false) {
         isDrawRealTime = true;
-        console.log("isDrawRealTime" + isDrawRealTime);
+        debugLog("isDrawRealTime" + isDrawRealTime);
         setCanvas(_canvas);
 
         //◇リアルタイム描画開始処理
@@ -488,7 +514,7 @@ const switchRealTime = (_canvas) => {
     }
     else if (isDrawRealTime == true) {
         isDrawRealTime = false;
-        console.log("isDrawRealTime" + isDrawRealTime);
+        debugLog("isDrawRealTime" + isDrawRealTime);
     }
 }
 
@@ -500,15 +526,15 @@ const drawRTGraphic = (_canvases, _data, _dataIndex, _drawReatTimeCB) => {
     if (_canvases != null) {
         if (isDrawRealTime == true) {
 
-            drawSpectCanvas(_canvases["realTimeCanvas"], _dataIndex, _canvas);
-            
+            drawSpectCanvas(_data, _dataIndex, _canvases);
+
             _drawReatTimeCB.onProcess(isDrawRealTime);
         }
         else {
             _drawReatTimeCB.onProcess(isDrawRealTime);
         }
     } else {
-        console.log("not _drawReatTimeCB");
+        debugLog("not _drawReatTimeCB");
         return;
     }
 }
@@ -520,7 +546,7 @@ const countRecTime = (_deltaTime, _onRecCB) => {
     if (isRecording == true) {
         recTime += _deltaTime;
         _onRecCB.onProcess(recTime);
-        console.log("recTime" + recTime);
+        debugLog("recTime" + recTime);
     }
     else {
         return;
@@ -530,7 +556,7 @@ const countRecTime = (_deltaTime, _onRecCB) => {
 //収録時間が上限に達したら収録を停止
 const judgeRecTime = (_afterAtorageTime) => {
     if (recTime >= _afterAtorageTime) {
-        console.log("recTime >= afterAtorageTime");
+        debugLog("recTime >= afterAtorageTime");
         stopRecording();
         recTime = 0;
     }
@@ -559,7 +585,7 @@ const getNumPlayingData = () => {
         numPlayingData = 0;
         // thumbnail = "none";
     }
-    console.log("numPlayingData" + numPlayingData);
+    debugLog("numPlayingData" + numPlayingData);
     return numPlayingData;
 };
 const getThumbnail = () => {
@@ -571,7 +597,7 @@ const getThumbnail = () => {
         // numPlayingData = 0;
         thumbnail = "none";
     }
-    console.log("thumbnail :" + thumbnail);
+    debugLog("thumbnail :" + thumbnail);
     return thumbnail;
 };
 
@@ -607,15 +633,15 @@ const animateCanvases = (_canvas) => {
             dataIndex = processIndex;
 
             drawSpectCanvas(data, dataIndex, _canvas);
-            //drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
-            //drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
+            drawTimeDomainCanvas(data, dataIndex, A_canvasTimeDomain);
+            drawSpectrogram(data, dataIndex, A_canvasSpectrogram);
 
 
             dataIndex += 1;
             //ループする条件
             if (data["dataList"].length - 1 < dataIndex) {
                 dataIndex = -1;
-                console.log("loop");
+                debugLog("loop");
                 requestAnimationFrame(() => { animateCanvases(_canvas) });
                 return;
             }
@@ -652,10 +678,11 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
         } else {
             targetCanvasContext.lineTo(x, y);
         }
-        let f = Math.floor(i * fsDivN);                                     // index -> frequency;
+        let f = Math.floor(i * fsDivN);
 
         if ((f % 500) === 0) {                                              // 500 Hz単位にy軸の線とラベル出力
             let text = (f < 1000) ? (f + ' Hz') : ((f / 1000) + ' kHz');
+
             targetCanvasContext.fillRect(x, 0, 1, targetCanvas.height);     // Draw grid (X)
             targetCanvasContext.fillText(text, x, targetCanvas.height);     // Draw text (X)
         }
@@ -672,7 +699,15 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
         // Draw text (Y)
         targetCanvasContext.fillText(text, 0, gy);
     }
+    let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
+    debugLog("targetSpectDataList.length" + targetSpectDataList.length);
+    debugLog("maxSpectrumIndex:          " + maxSpectrumIndex);
+    debugLog("maxSpectrumIndex.spectrum:          " + targetSpectDataList[maxSpectrumIndex]);
 }
+
+
+
+
 
 //波形データを描画
 const drawTimeDomainCanvas = (_data, _index, _canvas) => {
@@ -686,7 +721,7 @@ const drawTimeDomainCanvas = (_data, _index, _canvas) => {
 
     //visDataの中の時間領域データリスト
     let targetTimeDomainDataList = rawData["timeDomain"];
-    console.log(targetTimeDomainDataList);
+    debugLog(targetTimeDomainDataList);
 
     for (var i = 0, len = targetTimeDomainDataList.length; i < len; i++) {
         //canvasにおさまるように線を描画
@@ -694,8 +729,8 @@ const drawTimeDomainCanvas = (_data, _index, _canvas) => {
         let y = (1 - (targetTimeDomainDataList[i] / 255)) * targetCanvas.height;
         if (i === 0) {
             targetCanvasContext.moveTo(x, y);
-            console.log("x:    " + x);
-            console.log("y:    " + y);
+            debugLog("x:    " + x);
+            debugLog("y:    " + y);
         } else {
             targetCanvasContext.lineTo(x, y);
         }
@@ -720,8 +755,8 @@ const drawSpectrogram = (_data, _index, _canvas) => {
     let targetSpectDataList = rawData["frequency"];
 
     let maxSpectrumIndex = targetSpectDataList.indexOf(Math.max(...targetSpectDataList));
-    console.log("maxSpectrumIndex:          " + maxSpectrumIndex);
-    console.log("maxSpectrumIndex.spectrum:          " + targetSpectDataList[maxSpectrumIndex]);
+    debugLog("maxSpectrumIndex:          " + maxSpectrumIndex);
+    debugLog("maxSpectrumIndex.spectrum:          " + targetSpectDataList[maxSpectrumIndex]);
 
 
     for (let i = 0; i < targetCanvas.height; i++) {
@@ -746,9 +781,27 @@ const calcFrequencyPeak = (_data, _index) => {
     let requencyList = rawData["frequency"];
     let spectrumPeakIndex = requencyList.indexOf(Math.max(...requencyList));
     spectrumPeak = fsDivN * spectrumPeakIndex;
+    debugLog("spectrumPeak" + spectrumPeak);
     N_spectrumPeak = spectrumPeak / (audioCtx.sampleRate / 2);
 
 }
+
+// const getClipValue = (_spectrumPeak, _max, _min) => {
+//     let clippedValue;
+//     clippedValue = Math.min(_max, Math.max(_spectrumPeak, _min));
+//     debugLog("clippedValue", clippedValue);
+//     return clippedValue;
+// }
+
+// const getNormalValue = (_clipValue, _max, _min) => {
+//     let normalValue;
+//     normalValue = (_clipValue - _min) / (_max - _min);
+//     debugLog("normalValue" + normalValue);
+//     return normalValue;
+// }
+
+
+
 
 
 //振幅のピークを計算
@@ -795,7 +848,7 @@ const drawRectangle = (_data, _index, _canvas) => {
 
     let rawData = _data["dataList"][_index]["raw"];
     let timeDomainList = rawData["timeDomain"];
-    let peak = getVolumePeak(_data,_index)["volume"];
+    let peak = getVolumePeak(_data, _index)["volume"];
 
     let barWidth = 2;
     //let x = canvas.width / dataList.length;
@@ -813,7 +866,7 @@ const drawRectangle = (_data, _index, _canvas) => {
 
     let velocity = 1;
 
-    console.log(color);
+    debugLog(color);
     pushBar(_canvas.width, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight), velocity, color);
     pushBar(_canvas.width, _canvas.height / 2, barWidth, ((_canvas.height / 2) - barHeight), velocity, color);
 
@@ -824,8 +877,8 @@ const drawRectangle = (_data, _index, _canvas) => {
             bars.shift();
         }
     });
-    console.log("bars.length :   " + bars.length);
-    console.log("y : " + barHeight);
+    debugLog("bars.length :   " + bars.length);
+    debugLog("y : " + barHeight);
 }
 
 
@@ -913,3 +966,7 @@ const endRecording = function () {
     isCollecting = false;
     //audioDataをサーバに送信するなど終了処理
 };
+
+const debugLog = (text)=>{
+    console.log(text);
+}

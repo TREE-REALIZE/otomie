@@ -41,6 +41,7 @@
             display: flex;
         }
     </style>
+    <script src="otomie-visual.js"></script>
     <script src="voice_analyse.js"></script>
     <script src="app.js"></script>
 
@@ -68,18 +69,22 @@
     <hr>
     <div id=GraphClum>
         <div id="realTimeGraphs">
+            <div id="Graphic" width="500" height="250"></div><br>
+            タイムライン<br>
+            <canvas id="CanvasWaveFormRec" width="500" height="200"></canvas><br>
             スペクトラム<br>
             <canvas id="CanvasRealTime" width="500" height="250"></canvas><br>
             波形データ<br>
             <canvas id="canvasTimeDomain" width="500" height="250"></canvas><br>
             スペクトログラム<br>
             <canvas id="canvasSpectrogram" width="500" height="250"></canvas><br>
-            タイムライン<br>
-            <canvas id="CanvasWaveFormRec" width="500" height="250"></canvas><br>
 
-        </div>
 
-        <div id="laterGraphs">
+        <!-- </div>
+
+        <div id="laterGraphs"> -->
+            <h3>録画描画</h3>
+            <div id="Graphic_rec" width="500" height="250"></div><br>
             スペクトラム<br>
             <canvas id="CanvasRecMovie" width="500" height="250"></canvas><br>
             波形データ<br>
