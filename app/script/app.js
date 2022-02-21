@@ -137,8 +137,8 @@ const initRec = ({
     // ・
     // ・
     console.log("initRec");
-    setCallBack(initRecCB,{onReady,onComplete});
-    prepareRec(initRecCB);
+    // setCallBack(initRecCB,{onReady,onComplete});
+    prepareRec({onReady,onComplete});
 
 }
 
@@ -152,25 +152,11 @@ const recording = ({
     // ・
     // ・
     // ・
-    setCallBack(onRecCB,{onReady,onProcess,onComplete});
+    // setCallBack(onRecCB,{onReady,onProcess,onComplete});
 
     //realTimeCB();
-    startRecording();
-    
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
-    if (onProcess && typeof onProcess === "function") {
-        // onProcess(recTime);
-        // onProcess(1);
-        // onProcess(2);
-        // onProcess(3);
-        // onProcess(4);
-        // onProcess(5);
-    }
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    startRecording({onReady,onProcess,onComplete});
+
 }
 
 
@@ -195,15 +181,15 @@ const stopRec = ({
     // ・
     // ・
     // ・
-    stopRecording();
+    stopRecording({onReady,onComplete});
     console.log("stopRec");
 
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
 
 }
 
@@ -218,17 +204,17 @@ const play = (_canvas, {
     // ・
     // ・
     console.log("play");
-    playDataList(_canvas);
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
-    if (onProcess && typeof onProcess === "function") {
-        onProcess(isPlaying);
-    }
+    playDataList(_canvas,{onReady,onProcess,onComplete});
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
+    // if (onProcess && typeof onProcess === "function") {
+    //     onProcess(isPlaying);
+    // }
 
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
 
 }
 
@@ -241,15 +227,15 @@ const stopPlaying = ({
     // ・
     // ・
     // ・
-    stopDataList();
+    stopDataList({onReady,onComplete});
     console.log("stopPlay");
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
 
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
 }
 
 
@@ -264,13 +250,13 @@ const deleteData = ({
     // ・
 
     console.log("deleteData");
-    deletePlayingData();
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
+    deletePlayingData({onReady,onComplete});
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
 
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
 
 }
