@@ -180,7 +180,6 @@ const initPlayAudioCtx = () => {
 //音を再生する．
 const playSound = () => {
     source.connect(playAudioCtx.destination);
-
 }
 
 
@@ -208,11 +207,7 @@ const playDataList = (_canvas) => {
                 isPlaying = true;
                 dataIndex = -1;
                 //animateCanvases(_canvas);
-
                 //◇収録データの再生を開始
-
-
-
             }
         }
     } else {
@@ -288,9 +283,6 @@ const startCollecting = (_micOnCB = {}) => {
         //frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         //timeDomainData = new Uint8Array(audioAnalyser.fftSize);
         mediastreamsource.connect(audioAnalyser);
-
-
-
     };
     // function error(e) {
     //     alert(e);
@@ -500,7 +492,9 @@ const setCanvas = (_canvas) => {
 const drawRTGraphic = (_canvas, _data, _dataIndex, _drawReatTimeCB) => {
     if (_canvas != null) {
         if (isDrawRealTime == true) {
-
+            
+            otomieVisual.updateSoundData(_data["dataList"][dataIndex]["visual"]);
+            
             drawSpectCanvas(_data, _dataIndex, _canvas);
             _drawReatTimeCB.onProcess(isDrawRealTime);
         }
@@ -642,7 +636,7 @@ const drawSpectCanvas = (_data, _index, _canvas) => {
     let visualData = _data["dataList"][_index]["visual"];
     let targetSpectDataList = rawData["frequency"];         //描画処理する対象の中の周波数データリスト
 
-    otomieVisual.updateSoundData(visualData);
+ 
 
     for (let i = 0, len = targetSpectDataList.length; i < len; i++) {
         //canvasにおさまるように線を描画
