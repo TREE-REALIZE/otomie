@@ -24,19 +24,18 @@ window.addEventListener("load", () => {
     getCanvases();
 
     document.querySelector("#TitleWindow").addEventListener("click", micOn);
-    document.querySelector("#drawRealTime").addEventListener("click", ()=>{drawRealTime(canvasFrequency,{})});
+    document.querySelector("#drawRealTime").addEventListener("click", () => { drawRealTime(canvasFrequency, {}) });
     console.log("canvasFrequency:   " + canvasFrequency);
     document.querySelector("#getArchive").addEventListener("click", getArchive);
     document.querySelector("#initRec").addEventListener("click", initRec);
     document.querySelector("#recording").addEventListener("click", recording);
     document.querySelector("#stopRec").addEventListener("click", stopRec);
-    document.querySelector("#play").addEventListener("click", ()=>{play(A_canvasFrequency,{})});
+    document.querySelector("#play").addEventListener("click", () => { play(A_canvasFrequency, {}) });
     document.querySelector("#stopPlay").addEventListener("click", stopPlaying);
     document.querySelector("#deleteData").addEventListener("click", deleteData);
 
     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
-    otomieVisual.setup(document.querySelector("#Graphic"), 640, 640);
-    otomieVisual.play();
+
     console.log("load finish");
 });
 
@@ -48,8 +47,8 @@ const micOn = ({
     console.log("micON called");
 
     //マイクをONにする処理
-    setCallBack(micOnCB,{onReady,onComplete});
-    startCollecting(micOnCB);
+    // setCallBack(micOnCB,{onReady,onComplete});
+    startCollecting({ onReady, onComplete });
 
     // if (onReady && typeof onReady === "function") {
     //     console.log("onReady && typeof onReady ");
@@ -61,8 +60,6 @@ const micOn = ({
     // }
 }
 
-// drawRealTime(_canvas, { onReady, onProcess, onComplete });
-// play(_canvas, { onReady, onProcess, onComplete });
 
 const drawRealTime = (_canvas, {
     onReady = () => { },
@@ -74,32 +71,31 @@ const drawRealTime = (_canvas, {
     // ・
     // ・
     // ・
-    setCallBack(drawReatTimeCB,{onReady,onProcess,onComplete});
-    // setCallBack()
-    switchRealTime(_canvas,drawReatTimeCB);
+    // setCallBack(drawReatTimeCB,{onReady,onProcess,onComplete});
+    switchRealTime(_canvas, { onReady, onProcess, onComplete });
     //console.log("drawRealTime:   " + drawRealTime);
-    
+
     // const otimieVisual = new OtomieVisual.OtomieVisual();
     // console.log("otimieVisual",otimieVisual);
     // otimieVisual.init(document.querySelector("#CanvasRealTime"), 640, 640);
     // otimieVisual.render();
 
 
-    if (onReady && typeof onReady === "function") {
-        onReady(true);
-    }
-    if (onProcess && typeof onProcess === "function") {
-        onProcess(isDrawRealTime);
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
+    // if (onProcess && typeof onProcess === "function") {
+    //     onProcess(isDrawRealTime);
 
-    }
-    if (onComplete && typeof onComplete === "function") {
-        onComplete(true);
-    }
+    // }
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
 }
 
 
 
-const getArchive = (_canvas,{
+const getArchive = (_canvas, {
     onReady = () => { },
     getNum = () => { },
     getImage = () => { },
@@ -138,8 +134,8 @@ const initRec = ({
     // ・
     // ・
     console.log("initRec");
-    setCallBack(initRecCB,{onReady,onComplete});
-    prepareRec(initRecCB);
+    // setCallBack(initRecCB,{onReady,onComplete});
+    prepareRec({ onReady, onComplete });
 
 }
 
@@ -153,11 +149,11 @@ const recording = ({
     // ・
     // ・
     // ・
-    setCallBack(onRecCB,{onReady,onProcess,onComplete});
+    // setCallBack(onRecCB,{onReady,onProcess,onComplete});
 
     //realTimeCB();
-    startRecording();
-    
+    startRecording({ onReady, onProcess, onComplete });
+
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
@@ -178,12 +174,12 @@ const recording = ({
 
 
 // //UIManager側
-const setRecTime = () => {
-    element = document.querySelector('#recTime');
-    element.value = recTime;
-};
+// const setRecTime = () => {
+//     element = document.querySelector('#recTime');
+//     element.value = recTime;
+// };
 
-setInterval(setRecTime, 10);
+// setInterval(setRecTime, 10);
 
 
 
@@ -196,7 +192,7 @@ const stopRec = ({
     // ・
     // ・
     // ・
-    stopRecording();
+    stopRecording({ onReady, onComplete });
     console.log("stopRec");
 
     if (onReady && typeof onReady === "function") {
@@ -219,7 +215,7 @@ const play = (_canvas, {
     // ・
     // ・
     console.log("play");
-    playDataList(_canvas);
+    playDataList(_canvas, { onReady, onProcess, onComplete });
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }
@@ -242,7 +238,7 @@ const stopPlaying = ({
     // ・
     // ・
     // ・
-    stopDataList();
+    stopDataList(onReady, onComplete);
     console.log("stopPlay");
     if (onReady && typeof onReady === "function") {
         onReady(true);
@@ -265,7 +261,7 @@ const deleteData = ({
     // ・
 
     console.log("deleteData");
-    deletePlayingData();
+    deletePlayingData({ onReady, onComplete });
     if (onReady && typeof onReady === "function") {
         onReady(true);
     }

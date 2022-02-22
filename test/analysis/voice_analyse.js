@@ -95,21 +95,23 @@ let visual = {               //ビジュアル用に正規化
 };
 
 
-//app.jsからのコールバック一時保存用
-let micOnCB = {};
-let drawReatTimeCB = {};
-let initRecCB = {};
-let onRecCB = {};
+
 
 const medias = {
     audio: true,
     video: false
 };
 
+
+
 const pitchMax = 4000.0;
 const pitchMin = 27.0;
 
-
+//app.jsからのコールバック一時保存用
+// let micOnCB = {};
+let drawRealTimeCB = {};
+let initRecCB = {};
+let onRecCB = {};
 
 const getCanvases = () => {
     graphicContainer = document.querySelector("#Graphic");
@@ -132,7 +134,7 @@ const getCanvases = () => {
 };
 
 
-const prepareRec = (_initRecCB) => {
+const prepareRec = (_initRecCB = {}) => {
     if (typeof isRecording !== 'undefined') {
         playingData = {};
         _initRecCB.onReady(true);
@@ -188,28 +190,22 @@ const getPCMData = (_playingData) => {
 
 let playAudioCtx;           //再生用オーディオコンテキスト
 let playAudioBuffer;
-
 let playsource;
 
 //再生用のオーディオコンテキストを作る．
-const initPlayAudioCtx = () => {
+const PlayAudioCtx = () => {
     playAudioCtx = new AudioContext();
     // let source = playAudioCtx.createMediaStreamSource(stream);
-    source = playAudioCtx.createBufferSource();
+    let source = playAudioCtx.createBufferSource();
+    // source.buffer = ...A_canvasFrequency..
     playAudioBuffer = playAudioCtx.createBuffer()
     //source.buffer = ...;
     //let processor = playAudioCtx.createScriptProcessor(1024,1,1);
     //source.connect(processor);
-
-
-
-}
-
-//音を再生する．
-const playSound = () => {
     source.connect(playAudioCtx.destination);
 
 }
+
 
 
 //dataをJsonにする
@@ -284,13 +280,13 @@ const onAudioProcess = (e) => {
 
 
 const setCallBack = (_obj = {}, _CBObj = {}) => {
-    _obj.onReady = _CBObj.onReady;
-    _obj.onProcess = _CBObj.onProcess;
-    _obj.onComplete = _CBObj.onComplete;
+    // _obj.onReady = _CBObj.onReady;
+    // _obj.onProcess = _CBObj.onProcess;
+    // _obj.onComplete = _CBObj.onComplete;
 
 }
 
-const startCollecting = (_micOnCB = {}) => {
+const startCollecting = (_callback = {}) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     debugLog("startCollecting");
     // サンプルレートを保持しておく
@@ -317,9 +313,7 @@ const startCollecting = (_micOnCB = {}) => {
         //frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         //timeDomainData = new Uint8Array(audioAnalyser.fftSize);
         mediastreamsource.connect(audioAnalyser);
-
-
-
+        _callback.onReady(true);
     };
     // function error(e) {
     //     alert(e);
@@ -328,11 +322,8 @@ const startCollecting = (_micOnCB = {}) => {
 
     createJsonDataFormat();
 
-
-    _micOnCB.onReady(true);
-
-
-
+    otomieVisual.setup(document.querySelector("#Graphic"), 640, 640);
+    otomieVisual.play();
 };
 
 
@@ -416,9 +407,6 @@ const createFrameDataObj = () => {
 
 
 
-
-
-
 //解析データをリストに積んでいく処理
 const createData = (_frameData) => {
     dataList.push(_frameData);
@@ -469,18 +457,17 @@ const analyseVoice = () => {
     createData(frameDataObj);
 
 
-    otomieVisual.updateSoundData(frameDataObj["visual"]);
-
+    //otomieVisual.updateSoundData(frameDataObj["visual"]);
 
     countRecTime(audioDeltaTime, onRecCB);
     judgeRecTime(afterStorageTime);
 
 
-    //drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
+    drawRTGraphic(realTimeCanvas, data, dataIndex, drawRealTimeCB);
     drawSpectCanvas(data, dataIndex, canvasFrequency);
     drawTimeDomainCanvas(data, dataIndex, canvasTimeDomain);
-    drawRectangle(data,dataIndex,canvasTimeline);
-    drawSpectrogram(data,dataIndex,canvasSpectrogram);
+    drawRectangle(data, dataIndex, canvasTimeline);
+    drawSpectrogram(data, dataIndex, canvasSpectrogram);
     //drawTimeLine(, data, dataIndex, drawReatTimeCB);
     //getVisualData(data, dataIndex);
 
@@ -501,7 +488,7 @@ const getVisualData = (_data, _index) => {
 
 //リアルタイム描画開始用のスイッチ
 
-const switchRealTime = (_canvas) => {
+const switchRealTime = (_canvas, _callback) => {
     // realTimeCB.onReady = onReady;
     // realTimeCB.onProcess = onProcess;
     // realTimeCB.onComplete = onComplete;
@@ -511,9 +498,9 @@ const switchRealTime = (_canvas) => {
         debugLog("isDrawRealTime" + isDrawRealTime);
         setCanvas(_canvas);
 
+        _callback.onReady(true);
+        drawRealTimeCB = _callback;
         //◇リアルタイム描画開始処理
-
-
 
     }
     else if (isDrawRealTime == true) {
@@ -526,19 +513,20 @@ const setCanvas = (_canvas) => {
     realTimeCanvas = _canvas;
 }
 
-const drawRTGraphic = (_canvases, _data, _dataIndex, _drawReatTimeCB) => {
-    if (_canvases != null) {
+const drawRTGraphic = (_canvas, _data, _dataIndex, _drawRealTimeCB ={}) => {
+    if (_canvas != null) {
         if (isDrawRealTime == true) {
 
-            drawSpectCanvas(_data, _dataIndex, _canvases);
+            otomieVisual.updateSoundData(_data["dataList"][dataIndex]["visual"]);
 
-            _drawReatTimeCB.onProcess(isDrawRealTime);
+            drawSpectCanvas(_data, _dataIndex, _canvas);
+            _drawRealTimeCB.onProcess(isDrawRealTime);
         }
         else {
-            _drawReatTimeCB.onProcess(isDrawRealTime);
+            _drawRealTimeCB.onProcess(isDrawRealTime);
         }
     } else {
-        debugLog("not _drawReatTimeCB");
+        console.log("not _drawReatTimeCB");
         return;
     }
 }
@@ -971,6 +959,6 @@ const endRecording = function () {
     //audioDataをサーバに送信するなど終了処理
 };
 
-const debugLog = (text)=>{
-    console.log(text);
+const debugLog = (text) => {
+    //console.log(text);
 }
