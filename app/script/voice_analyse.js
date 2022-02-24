@@ -126,6 +126,15 @@ const stopRecording = (_stopRecCB) => {
         createJsonDataFormat();
         decordeJsonDataList(jsonData);
         jsonData = {};
+        
+        let cvs = document.querySelector("#CanvasWaveFormPlay");
+        let ctx = cvs.getContext("2d");
+        playBars.forEach((element)=>{
+            element.move();
+            element.render(ctx);
+        })
+        console.log("playBars",playBars);
+  
 
         _stopRecCB.onReady(true);
         _stopRecCB.onComplete(true);
@@ -187,6 +196,7 @@ const playDataList = (_canvas, callback) => {
                 //オーディオバッファノードに抽出したPCMをセット
                 //パラメータ設定
                 //ソーススタート
+      
                 animateCanvases(_canvas, callback);
             }
         }
@@ -840,8 +850,8 @@ const getVolumePeak = (_data, _index) => {
 }
 
 
-const bars = [];
-const playBars = [];
+let bars = [];
+let playBars = [];
 const drawRectangle = (_data, _index, _canvas) => {
     const ctx = _canvas.getContext('2d');
     ctx.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -878,12 +888,11 @@ const drawRectangle = (_data, _index, _canvas) => {
     //現在から1秒以上立っているバーは黒，
     // 現在時刻 ― data[dataList]["タイムスタンプ"] > 1秒 → 黒
 
-    let playBarsHead;
+    let playBarsHead = 0;
     //収録開始：青→青、新たにpushされるバーはオレンジ
     bars.forEach((element, index, array) => {
         element.move();
         element.render(ctx);
-
         if (element.x < endPoint - barWidth) {
             bars.shift();
         }
@@ -891,22 +900,19 @@ const drawRectangle = (_data, _index, _canvas) => {
             if ((performance.now() - element.time) / 1000 < beforeStorageTime) {
                 element.color = 'rgb(0, 0, 255)'
                 playBarsHead = index;
-                console.log("playBarsHead", playBarsHead);
+
+                // console.log("playBarsHead", playBarsHead);
 
 
             }
             else {
+
                 element.color = 'rgb(0, 0, 0)'
+                playBars = bars;
             }
         }
     });
 
-    // if (isRecording) {
-    //     bars.splice(playBarsHead).forEach((element) => {
-    //         playBars.push(element);
-    //         console.log("playBars", playBars);
-    //     });
-    // }
 
 
     debugLog("bars.length :   " + bars.length);
@@ -916,7 +922,7 @@ const drawRectangle = (_data, _index, _canvas) => {
 
 
 const pushBar = (x, y, w, h, velocity, color, time) => {
-    bars.push(new Rectangle(x, y, w, h, velocity, color, time));
+    bars.push(new Rectangle(x, y, w, h, velocity, color, time));    
 }
 
 
