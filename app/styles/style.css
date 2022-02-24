@@ -277,12 +277,12 @@ body {
 }
 
 /* 再生画面のグラフィックの親 */
-#CanvasRecMovie>canvas {
+#CanvasRecMovie {
     overflow: hidden;
 }
-
 /* 再生画面のグラフィック */
 #CanvasRecMovie>canvas {
+    overflow: hidden;
     width: 100%;
     height: 100%;
 }
