@@ -114,40 +114,18 @@ const stopRecording = (_stopRecCB) => {
         archiveData(data);
         debugLog("stopRecording");
         recTime = 0;
+
+        //再生用のオーディオコンテキストを作る．
+        playAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+
         _stopRecCB.onReady(true);
         _stopRecCB.onComplete(true);
-
-
-        //
-
-        // getPCMData(playingData);
     }
 }
 
 
-let playAudioCtx;           //再生用オーディオコンテキスト
-let playAudioBuffer;
 
-let playsource;
-
-//再生用のオーディオコンテキストを作る．
-const initPlayAudioCtx = () => {
-    playAudioCtx = new AudioContext();
-    // let source = playAudioCtx.createMediaStreamSource(stream);
-    source = playAudioCtx.createBufferSource();
-    playAudioBuffer = playAudioCtx.createBuffer()
-    //source.buffer = ...;
-    //let processor = playAudioCtx.createScriptProcessor(1024,1,1);
-    //source.connect(processor);
-
-
-
-}
-
-//音を再生する．
-const playSound = () => {
-    source.connect(playAudioCtx.destination);
-}
 
 
 //dataをJsonにする
@@ -167,24 +145,38 @@ const decordeJsonDataList = (jsonData) => {
 
 const otomieVisual_Rec = new OtomieVisual();
 //再生ボタンを押下したときに実行される関数．
+//再生ボタンを押下したときに実行される関数．
 const playDataList = (_canvas, callback) => {
+    console.log("playdatalist");
     if (!isRecording) {
+        console.log("isRecording");
         if (playingData) {
             if (!isPlaying) {
+                console.log("!isPlaying");
+
                 isPlaying = true;
-                dataIndex = -1;
 
                 if (_canvas.hasChildNodes() == false) {
                     console.log("_canvas", _canvas);
                     otomieVisual_Rec.setup(_canvas, 1024, 1024);
                 }
                 // const otomieVisual = new otomieVisual.OtomieVisual();
-                isDrawRealTime = false;
+                // isDrawRealTime = false;
 
                 //◇収録データの再生を開始
-                if (audioCtx.state === "running") {
+                if (playAudioCtx.state !== "suspended") {
+                    dataIndex = -1;
+
+                    console.log("playAudioCtx state", playAudioCtx.state);
                     playPCMData();
                 }
+                else {
+                    console.log("playAudioCtx.resume");
+                    console.log("playAudioCtx", playAudioCtx);
+                    playAudioCtx.resume();
+                }
+
+
                 callback.onReady(true);
                 otomieVisual_Rec.play();
 
@@ -201,11 +193,15 @@ const playDataList = (_canvas, callback) => {
         return;
     }
 }
+
+
+let playAudioCtx;           //再生用オーディオコンテキスト
 let playDataSource;
 const playPCMData = () => {
-    playDataSource = audioCtx.createBufferSource();
+    
+    playDataSource = playAudioCtx.createBufferSource();
     let PCMdata = getPCMData(playingData);
-    let audioBuffer = audioCtx.createBuffer(1, PCMdata.length, audioCtx.sampleRate);
+    let audioBuffer = playAudioCtx.createBuffer(1, PCMdata.length,audioCtx.sampleRate);
     audioBuffer.getChannelData(0).set(PCMdata);
     playDataSource.buffer = audioBuffer;
     playDataSource.loop = false;                   //. ループ再生するか？
@@ -213,17 +209,19 @@ const playPCMData = () => {
     playDataSource.loopEnd = audioBuffer.duration; //. オーディオ終了位置（秒単位）
     playDataSource.playbackRate.value = 1.0;       //. 再生速度＆ピッチ
 
-    playDataSource.connect(audioCtx.destination);
+    playDataSource.connect(playAudioCtx.destination);
 
     //. for lagacy browsers
 
     playDataSource.start(0);
+    console.log("playDataSource.start(0)");
     // if (isPlaying == false) {
     //     source.stop();
     //     console.log("source.Stop()");
     // }
 
 }
+
 
 
 //収録データからPCMをgetする．
@@ -243,14 +241,15 @@ const getPCMData = (_playingData) => {
 }
 
 
-
 //再生ボタンを押下したときに実行される関数．
 const stopDataList = (_stopPlayingCB) => {
     if (!isRecording) {
         if (isPlaying) {
             isPlaying = false;
-            dataIndex = -1;
+            // dataIndex = -1;
             console.log("isPlaying", isPlaying);
+            playAudioCtx.suspend();
+            otomieVisual_Rec.stop();
             //◇収録データの再生を停止
             _stopPlayingCB.onReady(true);
             _stopPlayingCB.onComplete(true);
@@ -643,7 +642,7 @@ const animateCanvases = (_canvas, _callback) => {
                     break;
                 }
             }
-            dataIndex = processIndex;
+            // dataIndex = processIndex;
             _callback.onProcess(true);
             // drawSpectCanvas(data, dataIndex, _canvas);
             otomieVisual_Rec.updateSoundData(data["dataList"][dataIndex]["visual"]);
@@ -663,9 +662,9 @@ const animateCanvases = (_canvas, _callback) => {
         }
     }
     else {
-        playDataSource.stop();
-        otomieVisual_Rec.stop();
-        console.log("isPlaying", isPlaying);
+        // playDataSource.stop();
+        // otomieVisual_Rec.stop();
+        // console.log("isPlaying", isPlaying);
         return;
     }
     requestAnimationFrame(() => { animateCanvases(_canvas, _callback) });
