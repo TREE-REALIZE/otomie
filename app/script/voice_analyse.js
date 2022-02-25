@@ -80,6 +80,7 @@ let micOnCB = {};
 let drawReatTimeCB = {};
 let initRecCB = {};
 let recordingCB = {};
+let playBarsNum = 0;
 
 const prepareRec = (_initRecCB) => {
     playingData = {};
@@ -87,10 +88,13 @@ const prepareRec = (_initRecCB) => {
     _initRecCB.onReady(true);
     _initRecCB.onComplete(true);
 };
-
+let startRecNow = 0;
+let barsHeadIndex = 0;
 const startRecording = (_recordingCB) => {
     //debugLog("startRecorging");
     if (!isRecording) {
+        startRecNow = performance.now() - (beforeStorageTime*1000);
+        console.log("startRecNow", startRecNow);
         isRecording = true;
         recTime = 0;
         isPlaying = false;
@@ -104,16 +108,27 @@ const startRecording = (_recordingCB) => {
         recordingCB = _recordingCB;
 
         console.log("_canvas", realTimeCanvas);
-        thumbnail = getThumbnail(realTimeCanvas);
-        console.log("thumbnail", thumbnail);
+
+        let frameData = data["dataList"][dataIndex]["visual"];
+        console.log(frameData);
+        thumbnail = otomieVisual.takeScreenShot(frameData);
+
+        playBarsNum = 0;
         //recordingCB.onComplete(true);
     }
 };
+let cvs = document.querySelector("#CanvasWaveFormPlay");
+let ctx = cvs.getContext("2d");
+let ctxTimeLine = CanvasWaveFormRec.getContext("2d");
 
+let playBarWidth;
+let playBarHeadPos;
+let stopRecNow = 0;
 const stopRecording = (_stopRecCB) => {
     if (isRecording) {
         isRecording = false;
         startCollectingTime = 0;                             //時間をリセット
+        stopRecNow = performance.now();
         data.dataList = dataList;
         debugLog("stopRecording");
         recTime = 0;
@@ -126,19 +141,73 @@ const stopRecording = (_stopRecCB) => {
         createJsonDataFormat();
         decordeJsonDataList(jsonData);
         jsonData = {};
-        
-        let cvs = document.querySelector("#CanvasWaveFormPlay");
-        let ctx = cvs.getContext("2d");
-        playBars.forEach((element)=>{
-            element.move();
-            element.render(ctx);
-        })
-        console.log("playBars",playBars);
-  
 
+        getBars();
+        initBars();
+
+        playBars = playBars.filter(element => (element != ""));
+        console.log("playBars.length", playBars.length);
+
+        playBarWidth = playBars[playBars.length - 1].x - playBars[0].x;
+
+        let playBarsCenter = playBarWidth / 2;
+        let timeLineCvsCenter = timeLineCanvasWidth / 2;
+        let substitute = playBarsCenter - timeLineCvsCenter;
+        //キャンバスの幅を算出→キャンバスの真ん中の値を算出
+        //playBars真ん中―キャンバスの真ん中の値算出
+        //playBarsの全要素を差分うごかす。
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+
+        playBars.forEach((element) => {
+            element.stop();
+            element.x = element.x + substitute;
+
+            element.render(ctx);
+        });
+
+        // ctxTimeLine.clearRect(0, 0, CanvasWaveFormRec.width, CanvasWaveFormRec.height);
+        playBarHeadPos = playBars[0].x;
+        console.log("barslenght", bars.length);
+
+
+        console.log("stopRecNow", stopRecNow);
         _stopRecCB.onReady(true);
         _stopRecCB.onComplete(true);
     }
+}
+
+const initBars = () => {
+    //画面も削除？
+    ctxTimeLine.clearRect(0, 0, CanvasWaveFormRec.width, CanvasWaveFormRec.height);
+    console.log("ctxTimeLine", CanvasWaveFormRec.width);
+    bars.splice(0);
+    console.log("bars.length", bars.length);
+    console.log("playbars.length", playBars.length)
+    pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, -((CanvasWaveFormRec.height / 2) - 0), 1, "rgb(0,0,0)", performance.now());
+}
+
+
+const getBars = () => {
+    let _bars = bars;
+    let barsTailIndex = bars.index - 1;
+
+    playBars = [];
+
+    console.log("barsHeadIndex", barsHeadIndex);
+    //バーの数を取得する？
+    for (let i = 0; i < _bars.length; i++) {
+        playBars[i] = _bars[i];
+    }
+    playBars = playBars.filter((element) => {
+        if (element.time >= startRecNow && element.time <= stopRecNow) {
+            return true;
+        }
+    })
+    console.log("Bars", _bars.length)
+    console.log("_playBars", playBars.length);
+    // return _playBars;
+
 }
 
 //dataをJsonにする
@@ -149,7 +218,7 @@ const createJsonData = (_data) => {
 
 //受けとったJsonデータをオブジェクトにへんかんする．
 const decordeJsonDataList = (_jsonData) => {
-    console.log("jsonData" + _jsonData);
+    // console.log("jsonData" + _jsonData);
     playingData = JSON.parse(_jsonData);
 }
 
@@ -196,7 +265,7 @@ const playDataList = (_canvas, callback) => {
                 //オーディオバッファノードに抽出したPCMをセット
                 //パラメータ設定
                 //ソーススタート
-      
+
                 animateCanvases(_canvas, callback);
             }
         }
@@ -338,7 +407,7 @@ const startCollecting = (_micOnCB = {}) => {
     let barWidth = 1;
     let color = 'rgb(0, 0, 0)';
     pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, -((CanvasWaveFormRec.height / 2) - 0), 1, color, performance.now());
-    // pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, ((CanvasWaveFormRec.height / 2) - 0), 1, color, performance.now());
+    //pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, ((CanvasWaveFormRec.height / 2) - 0), 1, color, performance.now());
     _micOnCB.onReady(true);
 };
 
@@ -632,16 +701,17 @@ const getThumbnail = (container) => {
     canvas = otomieVisual.app.view;
     // canvas = container.firstElementChild;
     // canvasCtx = canvas.getContext("webgl");
-    console.log("canvasCtx", canvasCtx);
+
     thumbnail = canvas.toDataURL();
 
     return thumbnail;
 };
 
-
+let progressBarContainer = [];
 //アニメーション再生・ループ
 const animateCanvases = (_canvas, _callback) => {
     let data = playingData;
+
     if (isPlaying) {
         console.log("isPlaying", isPlaying);
 
@@ -649,6 +719,13 @@ const animateCanvases = (_canvas, _callback) => {
             dataIndex = 0;
             startTime = performance.now() / 1000;
             audioTime = data["dataList"][dataIndex].deltaTime;
+
+            //プログレスバーを生成．すでにプログレスバーのインスタンスは削除
+            progressBarContainer.splice(0);
+            progressBarContainer.push(new probressBar(playBarHeadPos, 0));
+            progressBarContainer[0].render(ctx);
+
+
         }
 
         let drawTime = (performance.now() / 1000) - startTime;
@@ -672,7 +749,32 @@ const animateCanvases = (_canvas, _callback) => {
             // drawSpectCanvas(data, dataIndex, _canvas);
             otomieVisual_Rec.updateSoundData(data["dataList"][dataIndex]["visual"]);
 
+
             dataIndex += 1;
+            let n_index = dataIndex / (data["dataList"].length - 1);
+            // let playbarsWidth = playBarWidth;
+
+            progressBarContainer[0].x = (n_index * playBarWidth) + playBarHeadPos;
+
+
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+            playBars.forEach((element) => {
+
+
+                console.log(element);
+                // element.color = "rgb(0,0,0)";
+                element.render(ctx);
+            });
+            progressBarContainer[0].render(ctx);
+
+            /////
+            //プログレスバーを移動させる．
+            //移動値：
+            //dataIndexを0－1に正規化
+            //プログレスバーのx座標 ＝ (N_dataIndex)*タイムライン幅 ＋ 余白;
+            //プログレスバー表示
+
             //ループする条件
             if (data["dataList"].length - 1 < dataIndex) {
                 dataIndex = -1;
@@ -852,6 +954,8 @@ const getVolumePeak = (_data, _index) => {
 
 let bars = [];
 let playBars = [];
+
+let timeLineCanvasWidth;
 const drawRectangle = (_data, _index, _canvas) => {
     const ctx = _canvas.getContext('2d');
     ctx.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -869,6 +973,7 @@ const drawRectangle = (_data, _index, _canvas) => {
     //ctx.fillRect(_canvas.width / 2, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight));
 
     let color = 'rgb(0, 0, 0)';
+
     if (isRecording) {
         color = 'rgb(255, 84, 18)';
     } else {
@@ -877,8 +982,10 @@ const drawRectangle = (_data, _index, _canvas) => {
 
     let velocity = 1;
     let dulation = 25;
-    let startPoint = _canvas.width - 20;
-    let endPoint = 20;
+    let margin = 20;
+    let startPoint = _canvas.width - margin;
+    let endPoint = margin;
+    timeLineCanvasWidth = startPoint - endPoint;
     debugLog(color);
     if (bars[bars.length - 1].x < _canvas.width - dulation) {
         pushBar(startPoint, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight), velocity, color, performance.now());
@@ -888,43 +995,55 @@ const drawRectangle = (_data, _index, _canvas) => {
     //現在から1秒以上立っているバーは黒，
     // 現在時刻 ― data[dataList]["タイムスタンプ"] > 1秒 → 黒
 
-    let playBarsHead = 0;
+
     //収録開始：青→青、新たにpushされるバーはオレンジ
     bars.forEach((element, index, array) => {
         element.move();
-        element.render(ctx);
-        if (element.x < endPoint - barWidth) {
-            bars.shift();
-        }
         if (!isRecording) {
             if ((performance.now() - element.time) / 1000 < beforeStorageTime) {
-                element.color = 'rgb(0, 0, 255)'
-                playBarsHead = index;
-
-                // console.log("playBarsHead", playBarsHead);
-
-
+                element.color = 'rgb(0, 0, 255)';
+                barsHeadIndex = 0;
             }
             else {
-
-                element.color = 'rgb(0, 0, 0)'
-                playBars = bars;
+                element.color = 'rgb(0, 0, 0)';
             }
         }
+        bars = bars.filter(element => (element.x >= endPoint - barWidth));
+
+        // if (element.x < endPoint - barWidth) {
+        //     bars.shift();
+        // }
+
+        element.render(ctx);
     });
 
+    console.log("bars.length :   " + bars.length);
 
-
-    debugLog("bars.length :   " + bars.length);
-    debugLog("y : " + barHeight);
 }
 
 
 
 const pushBar = (x, y, w, h, velocity, color, time) => {
-    bars.push(new Rectangle(x, y, w, h, velocity, color, time));    
+    bars.push(new Rectangle(x, y, w, h, velocity, color, time));
+    bars.push(new Rectangle(x, y, w, -h, velocity, color, time))
 }
 
+class probressBar {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.w = 1;
+        this.h = cvs.height;
+        this.color = "rgb(255,0,255)";
+    }
+    render(context) {
+        // context.clearRect(0,0,cvs.width,cvs.height);
+        context.beginPath();
+        context.fillStyle = this.color; // 青色
+        context.rect(this.x, this.y, this.w, this.h);
+        context.fill();
+    }
+}
 
 class Rectangle {
     constructor(x, y, width, height, velocity, color, time) {
@@ -935,11 +1054,13 @@ class Rectangle {
         this.velocityX = velocity; // この速度で横に移動する。]
         this.color = color;
         this.time = time;
-
     }
 
     move() {
         this.x -= this.velocityX;
+    }
+    stop() {
+        this.velocityX = 0;
     }
 
     render(context) {
@@ -950,6 +1071,10 @@ class Rectangle {
         context.rect(this.x, this.y, this.width, this.height);
         context.fill();
     }
+    delete(context) {
+        context.clearRect(this.x, this.y, this.w, this.h);
+    }
+
 }
 
 
