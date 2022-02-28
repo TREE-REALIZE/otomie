@@ -79,6 +79,14 @@ const pw = 1;
 const ph = 2;
 const otomieVisual_Rec = new OtomieVisual();
 
+
+let fpsCanvas = null
+window.addEventListener("load", () => {
+    fpsCanvas = document.querySelector('#fpsCanvas');
+    fpsCanvasCtx = fpsCanvas.getContext("2d");
+})
+
+
 const startCollecting = (_micOnCB = {}) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     debugLog("startCollecting");
@@ -106,10 +114,11 @@ const startCollecting = (_micOnCB = {}) => {
         mediastreamsource.connect(scriptProcessor);
         scriptProcessor.onaudioprocess = onAudioProcess;
         scriptProcessor.connect(audioCtx.destination);
-
         // 音声解析関連のノードの設定
         audioAnalyser = audioCtx.createAnalyser();
         audioAnalyser.fftSize = 2048;
+        fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
+
         //frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
         //timeDomainData = new Uint8Array(audioAnalyser.fftSize);
         mediastreamsource.connect(audioAnalyser);
@@ -122,6 +131,7 @@ const startCollecting = (_micOnCB = {}) => {
     createJsonDataFormat();
     pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, 0, 1, 'rgb(0, 0, 0)', performance.now());
     //pushBar(CanvasWaveFormRec.width, CanvasWaveFormRec.height / 2, 0, ((CanvasWaveFormRec.height / 2) - 0), 1, color, performance.now());
+    drawEndBar();
     _micOnCB.onReady(true);
 };
 
@@ -143,7 +153,7 @@ const onAudioProcess = (e) => {
 
 //解析用処理
 const analyseVoice = () => {
-    fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
+    // fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
     calcAudioDeltaTime();                                           //デルタタイムの算出
 
     let tracks = localMediaStream.getTracks();
@@ -177,11 +187,19 @@ const analyseVoice = () => {
     drawRectangle(data, dataIndex, CanvasWaveFormRec);
     getVisualData(data, dataIndex);
 
+
 }
 //オーディオ用のデルタ時間を計算
 const calcAudioDeltaTime = () => {
     audioDeltaTime = audioCtx.currentTime - audioLastTime;
     audioLastTime = audioCtx.currentTime;
+    let audioFPS = 0;
+    audioFPS = 1 / audioDeltaTime;
+    fpsCanvasCtx.clearRect(0, 0, fpsCanvas.width, fpsCanvas.height);
+    fpsCanvasCtx.font = "24px serif";
+    fpsCanvasCtx.fillText(Math.floor(audioFPS) + " FPS", 0, 50);
+
+    // console.log("audioFPS",audioFPS);
 }
 
 
@@ -226,20 +244,19 @@ const startRecording = (_recordingCB) => {
         data.time = new Date();
         data.samplingRate = audioCtx.sampleRate;
         data.fsDivN = fsDivN;
-        debugLog("data:     " + data.time);
-        _recordingCB.onReady(true);
-        recordingCB = _recordingCB;
 
-        console.log("_canvas", realTimeCanvas);
-
+        //収録開始時のサムネイル取得
         let frameData = data["dataList"][data["dataList"].length - 1]["visual"];
         console.log(frameData);
         thumbnail = otomieVisual.takeScreenShot(frameData);
 
+        //再生用のインデックスをリセット
         dataIndex = -1;
 
-
+        _recordingCB.onReady(true);
+        recordingCB = _recordingCB;
         //recordingCB.onComplete(true);
+
     }
 };
 
@@ -403,6 +420,8 @@ const stopDataList = (_stopPlayingCB) => {
     }
 }
 
+
+
 const restartDataList = (_restartPlayingCB) => {
     if (!isRecording) {
         isPlaying = false;
@@ -507,6 +526,7 @@ const createFrameDataObj = () => {
     visual.brightness = pitch;
     visual.objectCount = calcObjectCount(pitch, volume);
     visual.objectShape = sharpness;
+    visual.objectShape = 0.9;
     visual.speed = pitch;
 
     frameData.raw = raw;
@@ -624,7 +644,7 @@ const getNumPlayingData = () => {
 //アニメーション再生・ループ
 const animateCanvases = (_canvas, _callback) => {
     let data = playingData;
-
+    let drawDeltaTime;
     console.log("data.length", data["dataList"].length);
 
     if (isPlaying) {
@@ -640,11 +660,12 @@ const animateCanvases = (_canvas, _callback) => {
             progressBarContainer.push(new probressBar(playBarHeadPos, 0));
             progressBarContainer[0].render(ctx);
 
-
         }
 
         let drawTime = (performance.now() / 1000) - startPlayTime;
+        //deltaTime = 今回のdrawTime　―　前のdrawTime;
 
+        
         //描画対象のデータのインデックスを次に進める条件
         if (playDeltaTime <= drawTime) {
             let audioTotalTime = playDeltaTime;
@@ -856,6 +877,17 @@ const getVolumePeak = (_data, _index) => {
     return volObj;
     // return peak;
 }
+let endBar = [];
+const drawEndBar = () => {
+    const dashedNum = 20;
+    const dashedDulation = 4;
+    const height = 15;
+    for (let i = 0; i < CanvasWaveFormRec.height; i++) {
+        endBar.push(new EndBar(margin, i * (dashedDulation + height), 2, height, "rgb(0,0,0)", 0));
+    }
+    endBar.push(new EndBar(CanvasWaveFormRec.width - margin, 0, 2, CanvasWaveFormRec.height, "rgb(0,0,0)", 0));
+    console.log("endBar", endBar);
+};
 
 const drawRectangle = (_data, _index, _canvas) => {
     const ctx = _canvas.getContext('2d');
@@ -884,7 +916,7 @@ const drawRectangle = (_data, _index, _canvas) => {
     let endPoint = margin;
 
     if (bars[bars.length - 1].x < startPoint - dulation) {
-        pushBar(startPoint, _canvas.height / 2, barWidth, ((_canvas.height / 2) - barHeight), velocity, color, performance.now());
+        pushBar(startPoint, _canvas.height / 2, barWidth, ((_canvas.height / 2) - barHeight) * 0.9 + 1, velocity, color, performance.now());
         // pushBar(startPoint, _canvas.height / 2, barWidth, ((_canvas.height / 2) - barHeight), velocity, color, performance.now());
     }
 
@@ -902,6 +934,14 @@ const drawRectangle = (_data, _index, _canvas) => {
         bars = bars.filter(element => (element.x >= endPoint - barWidth));
         element.render(ctx);
     });
+    endBar.forEach((element) => {
+        element.color = "rgb(0,0,0)";
+        element.render(ctx);
+    })
+
+
+
+
 }
 
 const pushBar = (x, y, w, h, velocity, color, time) => {
@@ -951,6 +991,12 @@ class Rectangle {
         //context.fillStyle = 'rgb(0, 0, 0)'; // 青色
         context.rect(this.x, this.y, this.width, this.height);
         context.fill();
+    }
+}
+
+class EndBar extends Rectangle {
+    constructor(x, y, width, height, color) {
+        super(x, y, width, height, color);
     }
 }
 
