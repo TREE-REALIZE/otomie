@@ -133,10 +133,10 @@ const getArchiveCallBack = {
         // CanvasRecMovie.style.backgroundColor = 'red';//これはできた
         // CanvasRecMovie.style.backgroundImage = 'url(http://alphasis.info/wp-content/uploads/2012/01/gimp-tutorial-12012402.jpg)'; //これもできた
         // CanvasRecMovie.style.backgroundImage = 'url(thumbnailImg)';
-        if (CanvasRecMovie.hasChildNodes() == true) { //子要素がいるなら
-            console.log('UI通知-CanvasRecMovieは子要素持っている');
-            CanvasRecMovie.firstChild.classList.add('Displaynone'); //CanvasRecMovieの子を見た目OFF
-        }
+        // if (CanvasRecMovie.hasChildNodes() == true) { //子要素がいるなら
+        //     console.log('UI通知-CanvasRecMovieは子要素持っている');
+        //     CanvasRecMovie.firstChild.classList.add('Displaynone'); //CanvasRecMovieの子を見た目OFF
+        // }
     }
 };
 
@@ -247,7 +247,7 @@ const stopRecCallBack = {
             changeRecBtnColor(); //収録ボタン色青に変更(おせるよーの見た目)
             nowState = State.isRecorded; //収録終了ステートに切替
             recCountText.textContent = '';
-            getArchive(getArchiveCallBack); //再生画面にサムネイル画像入れるため
+            getArchive(CanvasRecMovie, getArchiveCallBack); //再生画面にサムネイル画像入れるため
         }
         else {
             console.log("UI通知-stopRec-収録が停止できませんでした×");
