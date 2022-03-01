@@ -66,7 +66,7 @@ const micOnCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-micOn-マイクアクセスが許可されました〇");
-            drawRealTime(canvasRealTime, canvasWaveFormRec, drawRealTimeCallBack); //リアルタイム描画開始呼ぶ
+            drawRealTime(canvasRealTime, canvasWaveFormRec, canvasWaveFormPlay, drawRealTimeCallBack); //リアルタイム描画開始呼ぶ
             otomieVisual.setup(visualRealTime, 1024, 1024);
             otomieVisual.play();
         }
@@ -305,6 +305,7 @@ recContainer.addEventListener('transitionend', () => {
 const CanvasRecMovie = document.getElementById('CanvasRecMovie');
 let isClickBtnBackToRecWindow = false; //戻るボタン押されたフラグ　押されたらtrue,再生画面に遷移してきたときfalse
 const changePlayerWindowFunc = () => {
+    console.log('UI通知-再生画面に切替');
     changeRecPlayer(); //再生画面を再生状態に
     defenceClick(); //クリック抑止
 };
@@ -327,7 +328,7 @@ const clickedBackToRecWindowBtn = () => {
 };
 // restartPlayingコールバック
 const restartPlayingCallBack = {
-    onComplete: () => {
+    onComplete: (tf) => {
         if (tf == true) {
             console.log("UI通知-restartPlaying-再生位置リセット&再生停止が完了しました〇");
             if (!isSaveDataPlay) { //再生中でないなら
@@ -407,7 +408,7 @@ const canvasWaveFormPlay = document.getElementById('CanvasWaveFormPlay');
 // 〇〇〇〇再生画面 - 再生/停止ボタン押されたらまず呼ばれる関数
 const clickedPlayStopBtn = () => {
     if (!isSaveDataPlay) { //再生中でないなら
-        play(CanvasRecMovie, canvasWaveFormPlay, playCallBack); //再生
+        play(CanvasRecMovie, playCallBack); //再生
     } else { //再生中なら
         stopPlaying(stopPlayingCallBack); //停止
     }
@@ -433,7 +434,9 @@ const stopPlayingCallBack = {
             console.log("UI通知-stopPlaying-再生が停止されました〇");
             isSaveDataPlay = false; //再生中フラグOFF
             changeMovieBtnIcon(); //アイコン切替関数
-            toggleDeleteConfirm(); //削除確認ウインドウ表示
+            if(nowState == State.isClickedDelete){
+                toggleDeleteConfirm(); //削除確認ウインドウ表示
+            }
         }
         else {
             console.log("UI通知-stopPlaying-再生が停止できませんでした×");
