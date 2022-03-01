@@ -53,7 +53,7 @@ const micOn = ({
 // drawRealTime(_canvas, { onReady, onProcess, onComplete });
 // play(_canvas, { onReady, onProcess, onComplete });
 
-const drawRealTime = (_canvas, {
+const drawRealTime = (_canvas, _canvasTL, _canvasPB, {
     onReady = () => { },
     onProcess = () => { },
     onComplete = () => { },
@@ -64,9 +64,10 @@ const drawRealTime = (_canvas, {
     // ・
 
     // setCallBack()
-    switchRealTime(_canvas,  { onReady, onProcess, onComplete });
-    //console.log("drawRealTime:   " + drawRealTime);
 
+    switchRealTime(_canvas, _canvasTL, { onReady, onProcess, onComplete });
+    //console.log("drawRealTime:   " + drawRealTime);
+    initCanvasPB(_canvasPB);
     // const otimieVisual = new OtomieVisual.OtomieVisual();
     // console.log("otimieVisual",otimieVisual);
     // otimieVisual.init(document.querySelector("#CanvasRealTime"), 640, 640);
@@ -104,6 +105,7 @@ const getArchive = (_canvas, {
 
         getNum(getNumPlayingData());
         if (thumbnail !== null) {
+            console.log(thumbnail);
             getImage(thumbnail);
         }
         onComplete(true);
@@ -139,7 +141,7 @@ const initRec = ({
 
 }
 
-let element;
+
 const recording = ({
     onReady = () => { },
     onProcess = () => { },
@@ -152,6 +154,7 @@ const recording = ({
     // setCallBack(onRecCB,{onReady,onProcess,onComplete});
 
     //realTimeCB();
+
     startRecording({ onReady, onProcess, onComplete });
 
 }
@@ -201,6 +204,7 @@ const play = (_canvas, {
     // ・
     // ・
     console.log("play");
+
     playDataList(_canvas, { onReady, onProcess, onComplete });
     // if (onReady && typeof onReady === "function") {
     //     onReady(true);
