@@ -12,11 +12,6 @@ let startPlayTime = 0;
 let startRecTime = 0;
 let stopRecTime = 0;
 
-
-// const cvs = document.querySelector("#CanvasWaveFormPlay");
-// let ctx = cvs.getContext("2d");
-// let ctxTimeLine = CanvasWaveFormRec.getContext("2d");
-
 let playBarWidth;
 let playBarHeadPos;
 
@@ -86,10 +81,10 @@ const otomieVisual_Rec = new OtomieVisual();
 
 
 let fpsCanvas = null
-window.addEventListener("load", () => {
-    fpsCanvas = document.querySelector('#fpsCanvas');
-    fpsCanvasCtx = fpsCanvas.getContext("2d");
-})
+// window.addEventListener("load", () => {
+//     fpsCanvas = document.querySelector('#fpsCanvas');
+//     fpsCanvasCtx = fpsCanvas.getContext("2d");
+// })
 
 
 const startCollecting = (_micOnCB = {}) => {
@@ -111,7 +106,6 @@ const startCollecting = (_micOnCB = {}) => {
 
     function sucsess(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
         // 音声入力関連のノードの設定
-
         localMediaStream = stream;
         let scriptProcessor = audioCtx.createScriptProcessor(bufferSize, 1, 1);
         localScriptProcessor = scriptProcessor;
@@ -223,13 +217,11 @@ const decordeJsonDataList = (_jsonData) => {
 }
 
 
-
 const prepareRec = (_initRecCB) => {
     playingData = null;
     _initRecCB.onReady(true);
     _initRecCB.onComplete(true);
 };
-
 
 const startRecording = (_recordingCB) => {
     //debugLog("startRecorging");
@@ -523,7 +515,9 @@ const createFrameDataObj = () => {
     // visual.pitch = N_spectrumPeak;
 
     pitch = Math.min(pitchMax, Math.max(spectrumPeak, pitchMin));   //クリッピング
+    console.log("pitch",pitch);
     pitch = (pitch - pitchMin) / (pitchMax - pitchMin);             //正規化
+    console.log("N_pitch",pitch);
 
     volume = N_volumePeak;
 
@@ -534,8 +528,8 @@ const createFrameDataObj = () => {
     visual.brightness = pitch;
     visual.objectCount = calcObjectCount(pitch, volume);
     visual.objectShape = sharpness;
-    visual.objectShape = 0.9;
-    visual.speed = pitch;
+    // visual.objectShape = 0.16;
+    visual.speed = pitch*0.1;
 
     frameData.raw = raw;
     frameData.visual = visual;
@@ -851,6 +845,7 @@ const calcFrequencyPeak = (_data, _index) => {
     let requencyList = rawData["frequency"];
     let spectrumPeakIndex = requencyList.indexOf(Math.max(...requencyList));
     spectrumPeak = fsDivN * spectrumPeakIndex;
+    console.log("spectrumPeak",spectrumPeak);
     N_spectrumPeak = spectrumPeak / (audioCtx.sampleRate / 2);
 }
 
