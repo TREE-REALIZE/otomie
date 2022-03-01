@@ -46,18 +46,8 @@ const micOn = ({
 } = {}) => {
     console.log("micON called");
 
-    //マイクをONにする処理
-    setCallBack(micOnCB, { onReady, onComplete });
-    startCollecting(micOnCB);
-
-    // if (onReady && typeof onReady === "function") {
-    //     console.log("onReady && typeof onReady ");
-    //     onReady(true);
-
-    // }
-    // if (onComplete && typeof onComplete === "function") {
-    //     onComplete(true);
-    // }
+    //マイクをONにする処理  
+    startCollecting({ onReady, onComplete });
 }
 
 // drawRealTime(_canvas, { onReady, onProcess, onComplete });
@@ -72,10 +62,9 @@ const drawRealTime = (_canvas, {
     //リアルタイム描画する処理
     // ・
     // ・
-    // ・
-    setCallBack(drawReatTimeCB, { onReady, onProcess, onComplete });
+
     // setCallBack()
-    switchRealTime(_canvas, drawReatTimeCB);
+    switchRealTime(_canvas,  { onReady, onProcess, onComplete });
     //console.log("drawRealTime:   " + drawRealTime);
 
     // const otimieVisual = new OtomieVisual.OtomieVisual();
@@ -245,6 +234,26 @@ const stopPlaying = ({
     //     onComplete(true);
     // }
 }
+
+const restartPlaying = ({
+    onReady = () => { },
+    onComplete = () => { },
+}) => {
+    //再生停止する処理
+    // ・
+    // ・
+    // ・
+    restartDataList({ onReady, onComplete });
+    console.log("stopPlay");
+    // if (onReady && typeof onReady === "function") {
+    //     onReady(true);
+    // }
+
+    // if (onComplete && typeof onComplete === "function") {
+    //     onComplete(true);
+    // }
+}
+
 
 
 const deleteData = ({
