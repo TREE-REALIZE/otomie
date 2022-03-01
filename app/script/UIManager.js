@@ -59,13 +59,14 @@ micOnCard.addEventListener('click', clickedMicOnCard);
 
 const canvasRealTime = document.getElementById('CanvasRealTime');
 const visualRealTime = document.getElementById('VisualRealTime');
+const canvasWaveFormRec = document.getElementById('CanvasWaveFormRec');
 
 // micOnコールバック
 const micOnCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-micOn-マイクアクセスが許可されました〇");
-            drawRealTime(canvasRealTime, drawRealTimeCallBack); //リアルタイム描画開始呼ぶ
+            drawRealTime(canvasRealTime, canvasWaveFormRec, drawRealTimeCallBack); //リアルタイム描画開始呼ぶ
             otomieVisual.setup(visualRealTime, 1024, 1024);
             otomieVisual.play();
         }
@@ -218,6 +219,14 @@ const recordingCallBack = {
         // 時間をテキストに入れる
         recCountText.textContent = (countUI - recCount).toFixed(0);
         // recCountText.textContent = recCount.toFixed(0);
+    },
+    onComplete: (tf) => {
+        if(tf == true){
+            console.log("UI通知-recording-収録時間が終了しました〇");
+            recClick();
+        }else{
+            console.log("UI通知-recording-収録時間が終了できませんでした×");
+        }
     }
 };
 // stopRecコールバック
@@ -380,10 +389,12 @@ const changeMovieBtnIcon = () => {
     btnStartPlay.classList.toggle('PlayMovieBtn');
     btnStartPlay.classList.toggle('StopMovieBtn');
 };
+
+const canvasWaveFormPlay = document.getElementById('CanvasWaveFormPlay');
 // 〇〇〇〇再生画面 - 再生/停止ボタン押されたらまず呼ばれる関数
 const clickedPlayStopBtn = () => {
     if (!isSaveDataPlay) { //再生中でないなら
-        play(CanvasRecMovie, playCallBack); //再生
+        play(CanvasRecMovie, canvasWaveFormPlay, playCallBack); //再生
     } else { //再生中なら
         stopPlaying(stopPlayingCallBack); //停止
     }
