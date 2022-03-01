@@ -77,7 +77,7 @@ let canvasPBCtx;
 //タイムライン描画用のパラメーター
 let bars = [];
 let playBars = [];
-const dulation = 2;
+const dulation = 4;
 const margin = 30;
 const pd = 2;
 const pw = 1;
@@ -293,11 +293,11 @@ const initCanvasPB = (_canvasPB) => {
     canvasPB = _canvasPB;
     canvasPBCtx = canvasPB.getContext("2d");
     // showPlayBars(canvasPB);
-    
+
 }
 
 //再生ボタンを押下したときに実行される関数．
-const playDataList = (_canvas,  callback) => {
+const playDataList = (_canvas, callback) => {
     if (!isRecording) {
         if (playingData) {
             if (!isPlaying) {
@@ -365,7 +365,7 @@ const initBars = () => {
     canvasTLCtx.clearRect(0, 0, canvasTL.width, canvasTL.height);
     console.log("ctxTimeLine", canvasTL.width);
     bars.splice(0);
-    pushBar(canvasTL.width, canvasTL.height / 2, 0, 0, 0, "rgb(0,0,0)", performance.now());
+    pushBar(canvasTL.width - margin, canvasTL.height / 2, 0, 0, getBarVelocity(), "rgb(0,0,0)", performance.now());
 }
 
 
@@ -441,13 +441,14 @@ const restartDataList = (_restartPlayingCB) => {
         console.log("isPlaying", isPlaying);
         playAudioCtx.suspend();
         otomieVisual_Rec.stop();
-        progressBarContainer[0].x = (0 * playBarWidth) + playBarHeadPos;
         canvasPBCtx.clearRect(0, 0, canvasPB.width, canvasPB.height);
         playBars.forEach((element) => {
             // element.color = "rgb(0,0,0)";
             element.render(canvasPBCtx);
         });
-        progressBarContainer[0].render(canvasPBCtx);
+        // progressBarContainer[0].render(canvasPBCtx);
+        progressBarContainer[0].x = (0 * playBarWidth) + playBarHeadPos;
+
         _restartPlayingCB.onReady(true);
         _restartPlayingCB.onComplete(true);
     } else {
@@ -583,7 +584,7 @@ const switchRealTime = (_canvas, _canvasTL, _drawReatTimeCB) => {
         realTimeCanvas = _canvas;
         canvasTL = _canvasTL;
         canvasTLCtx = canvasTL.getContext("2d");
-        pushBar(canvasTL.width, canvasTL.height / 2, 0, 0, 1, 'rgb(0, 0, 0)', performance.now());
+        pushBar(canvasTL.width, canvasTL.height / 2, 0, 0, getBarVelocity(), 'rgb(0, 0, 0)', performance.now());
 
         drawEndBar();
         //◇リアルタイム描画開始処理
@@ -659,12 +660,14 @@ const getNumPlayingData = () => {
     return numPlayingData;
 };
 
+let lastDrawTime;
 
 //アニメーション再生・ループ
 const animateCanvases = (_canvas, _canvasPB, _callback) => {
     let data = playingData;
-    let drawDeltaTime;
 
+    // let lastDrawTime;
+    let drawTime;
     console.log("data.length", data["dataList"].length);
 
     if (isPlaying) {
@@ -673,19 +676,26 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
         if (dataIndex == -1) {
             dataIndex = 0;
             startPlayTime = performance.now() / 1000;
+            lastDrawTime = 0;
             playDeltaTime = data["dataList"][dataIndex].deltaTime;
 
             //プログレスバーを生成．すでにプログレスバーのインスタンスは削除
 
             progressBarContainer.splice(0);
-            progressBarContainer.push(new probressBar(playBarHeadPos, 0, 1, canvasPB.height));
+            progressBarContainer.push(new progressBar(playBarHeadPos, 0, 1, canvasPB.height));
             progressBarContainer[0].render(canvasPBCtx);
+
+
 
         }
 
-        let drawTime = (performance.now() / 1000) - startPlayTime;
-        //deltaTime = 今回のdrawTime　―　前のdrawTime;
+        drawTime = (performance.now() / 1000) - startPlayTime;
 
+        let drawDeltaTime = drawTime - lastDrawTime;
+        lastDrawTime = drawTime;
+
+        console.log("audioDeltaTime", audioDeltaTime);
+        console.log("drawDeltaTime", 1/drawDeltaTime);
 
         //描画対象のデータのインデックスを次に進める条件
         if (playDeltaTime <= drawTime) {
@@ -910,6 +920,14 @@ const drawEndBar = () => {
     console.log("endBar", endBar);
 };
 
+const getBarVelocity = () => {
+    let velocity;
+    let audioFps = (audioCtx.sampleRate / bufferSize);
+    velocity = (1/60)/(1/audioFps);
+    console.log("a",velocity);
+    return velocity;
+}
+
 const drawRectangle = (_data, _index, _canvas) => {
     const ctx = _canvas.getContext('2d');
     ctx.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -921,7 +939,8 @@ const drawRectangle = (_data, _index, _canvas) => {
     //let x = canvas.width / dataList.length;
     let barHeight = (1 - (peak / 255)) * _canvas.height;
     ctx.fillStyle = 'rgb(0, 0, 0)';
-    const velocity = 1;
+    const velocity = getBarVelocity();
+    console.log("velocity", velocity);
 
     //ctx.fillRect(_canvas.width / 2, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight));
 
@@ -952,7 +971,7 @@ const drawRectangle = (_data, _index, _canvas) => {
                 element.color = 'rgb(0, 0, 0)';
             }
         }
-        bars = bars.filter(element => (element.x >= endPoint - barWidth));
+        bars = bars.filter(element => (element.x >= endPoint + barWidth));
         element.render(ctx);
     });
     endBar.forEach((element) => {
@@ -972,13 +991,13 @@ const pushBar = (x, y, w, h, velocity, color, time) => {
     bars.push(new Rectangle(x, y - h - pd, pw, -ph, velocity, color, time));
 }
 
-class probressBar {
+class progressBar {
     constructor(x, y, w, h) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-        this.color = "rgb(255,0,255)";
+        this.color = "rgb(0,0,0)";
     }
     render(context) {
         // context.clearRect(0,0,cvs.width,cvs.height);

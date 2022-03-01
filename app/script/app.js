@@ -86,8 +86,6 @@ const drawRealTime = (_canvas, _canvasTL, _canvasPB, {
     }
 }
 
-
-
 const getArchive = (_canvas, {
     onReady = () => { },
     getNum = () => { },
