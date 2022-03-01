@@ -221,10 +221,10 @@ const recordingCallBack = {
         // recCountText.textContent = recCount.toFixed(0);
     },
     onComplete: (tf) => {
-        if(tf == true){
+        if (tf == true) {
             console.log("UI通知-recording-収録時間が終了しました〇");
             recClick();
-        }else{
+        } else {
             console.log("UI通知-recording-収録時間が終了できませんでした×");
         }
     }
@@ -323,10 +323,23 @@ const btnBackToRecWindow = document.getElementById('ButtonBackToRecWindow');
 const clickedBackToRecWindowBtn = () => {
     nowState = State.isClickedReturn; //戻るボタン押されたステートに切替
     defenceClick(); //クリック抑止
-    if (!isSaveDataPlay) { //再生中でないなら
-        getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
-    } else { //再生中なら
-        stopPlaying(stopPlayingCallBack); //停止
+    restartPlaying(restartPlayingCallBack); //再生位置をリセット&再生止める
+};
+// restartPlayingコールバック
+const restartPlayingCallBack = {
+    onComplete: () => {
+        if (tf == true) {
+            console.log("UI通知-restartPlaying-再生位置リセット&再生停止が完了しました〇");
+            if (!isSaveDataPlay) { //再生中でないなら
+                getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
+            } else { //再生中なら
+                changeMovieBtnIcon(); //再生停止アイコン切替関数
+                isSaveDataPlay = false; //再生中フラグOFF
+                getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
+            }
+        } else {
+            console.log("UI通知-restartPlaying-再生位置リセット&再生停止が完了できませんでした×");
+        }
     }
 };
 btnBackToRecWindow.addEventListener('click', clickedBackToRecWindowBtn);
@@ -418,16 +431,9 @@ const stopPlayingCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-stopPlaying-再生が停止されました〇");
-            changeMovieBtnIcon(); //アイコン切替関数
             isSaveDataPlay = false; //再生中フラグOFF
-            // もし戻るボタンが押されていたら
-            if (nowState == State.isClickedReturn) {
-                nowState = State.isClickedReturn; //戻るボタン押されたステートに切替
-                getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
-            } else if (nowState == State.isClickedDelete) { // もし削除確認ボタンが押されていたら
-                changeMovieBtnIcon(); //アイコン切替関数
-                toggleDeleteConfirm(); //削除確認ウインドウ表示
-            }
+            changeMovieBtnIcon(); //アイコン切替関数
+            toggleDeleteConfirm(); //削除確認ウインドウ表示
         }
         else {
             console.log("UI通知-stopPlaying-再生が停止できませんでした×");
