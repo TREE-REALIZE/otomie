@@ -66,7 +66,7 @@ let playDeltaTime;
 let progressBarContainer = [];
 
 //app.jsからのコールバック一時保存用
-let drawReatTimeCB = {};
+let drawRealTimeCB = {};
 let recordingCB = {};
 
 let canvasTL;
@@ -182,7 +182,7 @@ const analyseVoice = () => {
     calcSharpness(data, dataIndex);
     let frameDataObj = createFrameDataObj();                            //1フレーム分のデータ生成
     createData(frameDataObj);
-    drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
+    drawRTGraphic(realTimeCanvas, data, dataIndex, drawRealTimeCB);
     drawRectangle(data, dataIndex, canvasTL);
     countRecTime(audioDeltaTime, recordingCB);
     judgeRecTime(afterStorageTime, recordingCB);
@@ -570,8 +570,8 @@ const createData = (_frameData) => {
 
 
 //リアルタイム描画開始用のスイッチ
-const switchRealTime = (_canvas, _canvasTL, _drawReatTimeCB) => {
-    drawReatTimeCB = _drawReatTimeCB;
+const switchRealTime = (_canvas, _canvasTL, _drawRealTimeCB) => {
+    drawRealTimeCB = _drawRealTimeCB;
 
     if (isDrawRealTime == false) {
 
@@ -582,6 +582,7 @@ const switchRealTime = (_canvas, _canvasTL, _drawReatTimeCB) => {
         pushBar(canvasTL.width - margin, canvasTL.height / 2, 0, 0, getBarVelocity(), 'rgb(0, 0, 0)', performance.now());
 
         drawEndBar();
+        drawRealTimeCB.onReady(true);
         //◇リアルタイム描画開始処理
     }
     else if (isDrawRealTime == true) {
@@ -589,14 +590,14 @@ const switchRealTime = (_canvas, _canvasTL, _drawReatTimeCB) => {
     }
 }
 
-const drawRTGraphic = (_canvas, _data, _dataIndex, _drawReatTimeCB) => {
+const drawRTGraphic = (_canvas, _data, _dataIndex, _drawRealTimeCB) => {
     if (_canvas != null) {
         if (isDrawRealTime == true) {
             otomieVisual.updateSoundData(_data["dataList"][_dataIndex]["visual"]);
-            _drawReatTimeCB.onProcess(isDrawRealTime);
+            _drawRealTimeCB.onProcess(isDrawRealTime);
         }
         else {
-            _drawReatTimeCB.onProcess(isDrawRealTime);
+            _drawRealTimeCB.onProcess(isDrawRealTime);
         }
     } else {
         return;
