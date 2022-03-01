@@ -252,6 +252,18 @@ body {
     background-color: rgb(255, 84, 27);
 }
 
+/* サムネイル画像 */
+#ThumbnailImage {
+    position: absolute;
+    bottom: 40px;
+    left: 30px;
+    width: 105px;
+    height: 105px;
+    border-radius: 15%;
+    background-size: contain;
+    background-color: rgb(98, 218, 255);
+}
+
 /*--------------------- 再生画面(収録済み) -------------------------*/
 #PlayWindow {
     pointer-events: none;
