@@ -130,13 +130,11 @@ const getArchiveCallBack = {
     },
     getImage: (thumbnailImg) => {
         console.log('UI通知-getArchive-サムネイル画像を入れます');
-        // CanvasRecMovie.style.backgroundColor = 'red';//これはできた
-        // CanvasRecMovie.style.backgroundImage = 'url(http://alphasis.info/wp-content/uploads/2012/01/gimp-tutorial-12012402.jpg)'; //これもできた
-        // CanvasRecMovie.style.backgroundImage = 'url(thumbnailImg)';
-        // if (CanvasRecMovie.hasChildNodes() == true) { //子要素がいるなら
-        //     console.log('UI通知-CanvasRecMovieは子要素持っている');
-        //     CanvasRecMovie.firstChild.classList.add('Displaynone'); //CanvasRecMovieの子を見た目OFF
-        // }
+        CanvasRecMovie.style.backgroundImage =  "url(" + thumbnailImg + ")";
+        if (CanvasRecMovie.hasChildNodes() == true) { //子要素がいるなら
+            console.log('UI通知-CanvasRecMovieは子要素持っている');
+            CanvasRecMovie.firstChild.classList.add('Displaynone'); //CanvasRecMovieの子を見た目OFF
+        }
     }
 };
 
