@@ -225,7 +225,7 @@ const recordingCallBack = {
     },
     onProcess: (recCount) => {
         // 時間をテキストに入れる
-        recCountText.textContent = (countUI - recCount).toFixed(0);
+        recCountText.textContent = Math.floor(countUI - recCount);
     },
     onComplete: (tf) => {
         if (tf == true) {
