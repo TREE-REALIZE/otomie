@@ -182,14 +182,10 @@ const analyseVoice = () => {
     calcSharpness(data, dataIndex);
     let frameDataObj = createFrameDataObj();                            //1フレーム分のデータ生成
     createData(frameDataObj);
-
+    drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
+    drawRectangle(data, dataIndex, canvasTL);
     countRecTime(audioDeltaTime, recordingCB);
     judgeRecTime(afterStorageTime, recordingCB);
-    drawRTGraphic(realTimeCanvas, data, dataIndex, drawReatTimeCB);
-
-    drawRectangle(data, dataIndex, canvasTL);
-    getVisualData(data, dataIndex);
-
 
 }
 //オーディオ用のデルタ時間を計算
@@ -198,9 +194,10 @@ const calcAudioDeltaTime = () => {
     audioLastTime = audioCtx.currentTime;
     let audioFPS = 0;
     audioFPS = 1 / audioDeltaTime;
-    fpsCanvasCtx.clearRect(0, 0, fpsCanvas.width, fpsCanvas.height);
-    fpsCanvasCtx.font = "24px serif";
-    fpsCanvasCtx.fillText(Math.floor(audioFPS) + " FPS", 0, 50);
+
+    // fpsCanvasCtx.clearRect(0, 0, fpsCanvas.width, fpsCanvas.height);
+    // fpsCanvasCtx.font = "24px serif";
+    // fpsCanvasCtx.fillText(Math.floor(audioFPS) + " FPS", 0, 50);
 
     // console.log("audioFPS",audioFPS);
 }
@@ -250,7 +247,6 @@ const startRecording = (_recordingCB) => {
 
         //収録開始時のサムネイル取得
         let frameData = data["dataList"][data["dataList"].length - 1]["visual"];
-        console.log(frameData);
         thumbnail = otomieVisual.takeScreenShot(frameData);
 
         //再生用のインデックスをリセット
@@ -264,8 +260,11 @@ const startRecording = (_recordingCB) => {
 };
 
 
-const stopRecording = (_stopRecCB) => {
+const stopRecording = (_canvas, _stopRecCB) => {
     if (isRecording) {
+        if (_canvas.hasChildNodes() == false) {
+            otomieVisual_Rec.setup(_canvas, 1024, 1024);
+        }
         isRecording = false;
         startCollectingTime = 0;                             //時間をリセット
 
@@ -303,9 +302,7 @@ const playDataList = (_canvas, callback) => {
             if (!isPlaying) {
                 isPlaying = true;
 
-                if (_canvas.hasChildNodes() == false) {
-                    otomieVisual_Rec.setup(_canvas, 1024, 1024);
-                }
+
                 //◇収録データの再生を開始
                 if (playAudioCtx.state !== "suspended") {
                     dataIndex = -1;
@@ -342,7 +339,7 @@ const showPlayBars = (_canvas) => {
     //キャンバスの幅を算出→キャンバスの真ん中の値を算出
     //playBars真ん中―キャンバスの真ん中の値算出
     //playBarsの全要素を差分うごかす。
-    console.log("canvasPBCtx", canvasPBCtx);
+
     canvasPBCtx.clearRect(0, 0, canvasPB.width, canvasPB.height);
     playBars.forEach((element) => {
         element.stop();
@@ -352,7 +349,7 @@ const showPlayBars = (_canvas) => {
 
     // ctxTimeLine.clearRect(0, 0, CanvasWaveFormRec.width, CanvasWaveFormRec.height);
     playBarHeadPos = playBars[0].x;
-    console.log("barslenght", bars.length);
+
 }
 
 const resetDataList = () => {
@@ -363,7 +360,6 @@ const resetDataList = () => {
 const initBars = () => {
     //画面も削除？
     canvasTLCtx.clearRect(0, 0, canvasTL.width, canvasTL.height);
-    console.log("ctxTimeLine", canvasTL.width);
     bars.splice(0);
     pushBar(canvasTL.width - margin, canvasTL.height / 2, 0, 0, getBarVelocity(), "rgb(0,0,0)", performance.now());
 }
@@ -420,7 +416,6 @@ const stopDataList = (_stopPlayingCB) => {
         if (isPlaying) {
             isPlaying = false;
             // dataIndex = -1;
-            console.log("isPlaying", isPlaying);
             playAudioCtx.suspend();
             otomieVisual_Rec.stop();
             //◇収録データの再生を停止
@@ -436,9 +431,9 @@ const stopDataList = (_stopPlayingCB) => {
 
 const restartDataList = (_restartPlayingCB) => {
     if (!isRecording) {
+        console.log("restartDataList");
         isPlaying = false;
         dataIndex = -1;
-        console.log("isPlaying", isPlaying);
         playAudioCtx.suspend();
         otomieVisual_Rec.stop();
         canvasPBCtx.clearRect(0, 0, canvasPB.width, canvasPB.height);
@@ -447,7 +442,7 @@ const restartDataList = (_restartPlayingCB) => {
             element.render(canvasPBCtx);
         });
         // progressBarContainer[0].render(canvasPBCtx);
-        progressBarContainer[0].x = (0 * playBarWidth) + playBarHeadPos;
+        // progressBarContainer[0].x = (0 * playBarWidth) + playBarHeadPos;
 
         _restartPlayingCB.onReady(true);
         _restartPlayingCB.onComplete(true);
@@ -513,10 +508,10 @@ const createFrameDataObj = () => {
     let roughness = 0;
     // let sharpness = 0;
 
-    visual.pitch = 0;
-    visual.volume = 0;
-    visual.roughness = 0;
-    visual.sharpness = sharpness;
+    // visual.pitch = 0;
+    // visual.volume = 0;
+    // visual.roughness = 0;
+    // visual.sharpness = sharpness;
 
     visual.hue = 0;
     visual.saturation = 0;
@@ -584,7 +579,7 @@ const switchRealTime = (_canvas, _canvasTL, _drawReatTimeCB) => {
         realTimeCanvas = _canvas;
         canvasTL = _canvasTL;
         canvasTLCtx = canvasTL.getContext("2d");
-        pushBar(canvasTL.width, canvasTL.height / 2, 0, 0, getBarVelocity(), 'rgb(0, 0, 0)', performance.now());
+        pushBar(canvasTL.width - margin, canvasTL.height / 2, 0, 0, getBarVelocity(), 'rgb(0, 0, 0)', performance.now());
 
         drawEndBar();
         //◇リアルタイム描画開始処理
@@ -613,7 +608,6 @@ const countRecTime = (_deltaTime, _recordingCB) => {
     if (isRecording == true) {
         recTime += _deltaTime;
         _recordingCB.onProcess(recTime);
-        console.log("recTime" + recTime);
     }
     else {
         return;
@@ -624,9 +618,10 @@ const countRecTime = (_deltaTime, _recordingCB) => {
 const judgeRecTime = (_afterAtorageTime, _recordingCB) => {
     if (recTime >= _afterAtorageTime) {
         debugLog("recTime >= afterAtorageTime");
-        stopRecording();
+
         recTime = 0;
         _recordingCB.onComplete(true);
+        // stopRecording();
     }
     else {
         return;
@@ -668,7 +663,6 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
 
     // let lastDrawTime;
     let drawTime;
-    console.log("data.length", data["dataList"].length);
 
     if (isPlaying) {
         debugLog("isPlaying", isPlaying);
@@ -693,9 +687,6 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
 
         let drawDeltaTime = drawTime - lastDrawTime;
         lastDrawTime = drawTime;
-
-        console.log("audioDeltaTime", audioDeltaTime);
-        console.log("drawDeltaTime", 1/drawDeltaTime);
 
         //描画対象のデータのインデックスを次に進める条件
         if (playDeltaTime <= drawTime) {
@@ -913,18 +904,19 @@ const drawEndBar = () => {
     const dashedNum = 20;
     const dashedDulation = 4;
     const height = 15;
+    const width = 2;
     for (let i = 0; i < canvasTL.height; i++) {
-        endBar.push(new EndBar(margin, i * (dashedDulation + height), 2, height, "rgb(0,0,0)", 0));
+        endBar.push(new EndBar(margin - width, i * (dashedDulation + height), width, height, "rgb(0,0,0)", 0));
     }
-    endBar.push(new EndBar(canvasTL.width - margin, 0, 2, canvasTL.height, "rgb(0,0,0)", 0));
-    console.log("endBar", endBar);
+    endBar.push(new EndBar(canvasTL.width - margin, 0, width, canvasTL.height, "rgb(0,0,0)", 0));
+    debugLog("endBar", endBar);
 };
 
 const getBarVelocity = () => {
+    let distance = canvasTL.width - margin - margin;
     let velocity;
     let audioFps = (audioCtx.sampleRate / bufferSize);
-    velocity = (1/60)/(1/audioFps);
-    console.log("a",velocity);
+    velocity = distance / audioFps / (afterStorageTime + beforeStorageTime);
     return velocity;
 }
 
@@ -940,7 +932,7 @@ const drawRectangle = (_data, _index, _canvas) => {
     let barHeight = (1 - (peak / 255)) * _canvas.height;
     ctx.fillStyle = 'rgb(0, 0, 0)';
     const velocity = getBarVelocity();
-    console.log("velocity", velocity);
+
 
     //ctx.fillRect(_canvas.width / 2, _canvas.height / 2, barWidth, -((_canvas.height / 2) - barHeight));
 

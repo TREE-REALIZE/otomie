@@ -103,7 +103,6 @@ const getArchive = (_canvas, {
 
         getNum(getNumPlayingData());
         if (thumbnail !== null) {
-            console.log(thumbnail);
             getImage(thumbnail);
         }
         onComplete(true);
@@ -170,7 +169,7 @@ const recording = ({
 
 
 
-const stopRec = ({
+const stopRec = (_canvas,{
     onReady = () => { },
     onComplete = () => { },
 }) => {
@@ -179,7 +178,7 @@ const stopRec = ({
     // ・
     // ・
     // ・
-    stopRecording({ onReady, onComplete });
+    stopRecording(_canvas,{ onReady, onComplete });
     console.log("stopRec");
 
     // if (onReady && typeof onReady === "function") {
