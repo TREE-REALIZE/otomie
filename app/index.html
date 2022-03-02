@@ -5,11 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- アドレスバー非表示 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- ステータスバー半透明 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"> <!-- レンダリング領域を最大限まで広げる -->
+
     <title>オトミエ</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="styles/destyle.min.css">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="apple-touch-icon" href="images/AppIcon.png" />
 </head>
 
 <body>
@@ -72,7 +76,7 @@
             <div id="CanvasRecMovie"></div>
             <canvas id="CanvasWaveFormPlay"></canvas>
             <div id="RecDateTime"><img src="images/TimeIcon.png"></i> 2022年12月22日 12:35</div>
-            <div id="RecLocation"><img src="images/LocationIcon.png"></i> 港区南麻布三丁目</div>
+            <div id="RecLocation"><img src="images/LocationIcon.png"></i> 東京ビッグサイト 南展示棟</div>
             <div id="PlayBottomCover">
                 <div id="ButtonStartPlayBack">
                     <!-- 再生/停止ボタン -->
@@ -95,6 +99,7 @@
             <div id="DeleteText">削除</div>
             <div id="CancelText">キャンセル</div>
         </div>
+        <!-- <div id="DeleteCompleteText" class="">収録データを削除しました</div> -->
     </div>
 
     <script src="script/otomie-visual.js"></script>
