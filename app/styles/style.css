@@ -51,7 +51,7 @@ body {
 /* Splash画面画像フェードアウト */
 .FadeOutSplash {
     animation-name: fadeOutSplash;
-    animation-duration: 1.5s;
+    animation-duration: 2s;
     animation-timing-function: ease;
     animation-fill-mode: forwards;
 }
@@ -610,7 +610,7 @@ body {
 #TitleLogo {
     position: absolute;
     top: 83px;
-    width: 100%;
+    width: 428px;
     height: 46px;
 }
 
