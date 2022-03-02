@@ -398,11 +398,13 @@ const clickedDeleteTextBtn = () => {
 const deleteText = document.getElementById('DeleteText');
 deleteText.addEventListener('click', clickedDeleteTextBtn);
 
+const deleteCompleteText = document.getElementById('DeleteCompleteText');
 // deleteDataコールバック
 const deleteDataCallBack = {
     onReady: (tf) => {
         if (tf == true) {
             console.log("UI通知-deleteData-削除が完了しました〇");
+            deleteCompleteText.classList.remove('Displaynone'); //削除完了通知表示
             removeDefenceClick(); //クリック抑止解除
             removeGrayBackColor(); //抑止板灰色を解除
             getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
@@ -412,6 +414,12 @@ const deleteDataCallBack = {
         }
     }
 };
+deleteCompleteText.addEventListener('transitionend', () => {
+    if (recContainer.classList.contains('Displaynone') == false) {
+        deleteCompleteText.classList.add('Displaynone'); //サムネイル画像を現す
+    }
+});
+
 
 // 〇〇〇〇再生画面 - 再生/停止ボタン押してアイコン切替 -------------------------------------------
 const btnStartPlay = document.getElementById('ButtonStartPlay');
@@ -515,7 +523,8 @@ function keypress_ivent(e) {
         recContainer.classList.add('RecIcon');
     }
     if (e.key === 'd' || e.key === 'D') {
-        console.log('あ' + thumbnailImg);
+        console.log('あああああああああ');
+
     }
     return false;
 }
