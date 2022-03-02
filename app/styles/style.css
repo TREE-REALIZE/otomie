@@ -5,7 +5,7 @@
 
 body {
     position: relative;
-
+    user-select: none;
     margin: 0;
     /* あとで消す */
     background-color: rgb(204, 204, 204);
@@ -202,7 +202,7 @@ body {
     border-radius: 50%;
 }
 
-/* 収録開始ボタンの背景 */
+/* 収録開始ボタン */
 #ButtonStartRec {
     position: absolute;
     bottom: 5px;
@@ -231,7 +231,7 @@ body {
     left: 17px;
     width: 36px;
     height: 36px;
-    border-radius: 25%;
+    border-radius: 20%;
     line-height: 38px;
     font-family: sans-serif;
     font-weight: 100;
@@ -244,6 +244,7 @@ body {
 #ButtonStartRec.NormalRecBtn,
 #ButtonStartRec.NormalRecBtn #RecCountText {
     background-color: rgb(18, 77, 274);
+    border-radius: 50%;
 }
 
 /* 録画ボタン -録画状態 */
