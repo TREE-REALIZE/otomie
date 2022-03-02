@@ -6,6 +6,7 @@
 body {
     position: relative;
     user-select: none;
+    -webkit-user-select: none; /* Chrome, Safari, and Opera */
     margin: 0;
     /* あとで消す */
     background-color: rgb(204, 204, 204);
@@ -130,6 +131,33 @@ body {
         transform: translateX(-200%);
     }
 }
+
+/* タップしてつぎへ */
+.HowtoNext {
+    position: absolute;
+    bottom: 79px;
+    left: 0px;
+    width: 428px;
+    height: 25px;
+    animation-name: howtoNextAnim;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 30;
+}
+@keyframes howtoNextAnim {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.2;
+        transform: scale(0.95, 0.95);
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 
 /*-------------------- 収録画面 -----------------------*/
 #RecWindow {
@@ -718,6 +746,10 @@ body {
 #DeleteConfirmText.ActivePopupWindow #DeleteText,
 #DeleteConfirmText.ActivePopupWindow #CancelText {
     transition-duration: 0.2s;
+}
+#DeleteConfirmText.ActivePopupWindow #DeleteText:active,
+#DeleteConfirmText.ActivePopupWindow #CancelText:active {
+    transform: scale(0.95, 0.95);
 }
 
 /* 削除確認テキスト-非アクティブ状態 */
