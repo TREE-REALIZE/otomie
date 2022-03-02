@@ -660,7 +660,7 @@ body {
     }
 }
 
-/* 削除確認テキスト */
+/* 削除確認テキスト-アクティブ状態 */
 #DeleteConfirmText.ActivePopupWindow {
     pointer-events: auto;
     position: absolute;
@@ -679,8 +679,7 @@ body {
     letter-spacing: 0em;
     color: rgb(51, 51, 51);
 }
-
-/* 削除テキスト */
+/* 削除テキスト-アクティブ状態 */
 #DeleteConfirmText.ActivePopupWindow #DeleteText {
     position: absolute;
     top: 65px;
@@ -697,8 +696,7 @@ body {
     letter-spacing: 0em;
     color: rgb(51, 51, 51);
 }
-
-/* キャンセルテキスト */
+/* キャンセルテキスト-アクティブ状態 */
 #DeleteConfirmText.ActivePopupWindow #CancelText {
     position: absolute;
     top: 65px;
@@ -715,12 +713,105 @@ body {
     letter-spacing: 0em;
     color: rgb(255, 255, 255);
 }
+#DeleteConfirmText.ActivePopupWindow,
+#DeleteConfirmText.ActivePopupWindow #DeleteText,
+#DeleteConfirmText.ActivePopupWindow #CancelText {
+    transition-duration: 0.2s;
+}
 
-#DeleteConfirmText.InactivePopupWindow,
+/* 削除確認テキスト-非アクティブ状態 */
+#DeleteConfirmText.InactivePopupWindow {
+    pointer-events: auto;
+    position: absolute;
+    top: 294.5px;
+    left: 114px;
+    width: 200px;
+    height: 87px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0);
+    box-shadow: 0px 3px 10px 0px rgba(0, 0, 0, 0);
+    line-height: 50px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0em;
+    color: rgba(51, 51, 51, 0);
+}
+/* 削除テキスト-非アクティブ状態 */
+#DeleteConfirmText.InactivePopupWindow #DeleteText {
+    position: absolute;
+    top: 43.5px;
+    left: 20px;
+    width: 73px;
+    height: 27px;
+    border-radius: 5px;
+    background-color: rgba(200, 200, 200, 0);
+    line-height: 27px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    letter-spacing: 0em;
+    color: rgba(51, 51, 51, 0);
+}
+/* キャンセルテキスト-非アクティブ状態 */
+#DeleteConfirmText.InactivePopupWindow #CancelText {
+    position: absolute;
+    top: 43.5px;
+    left: 107px;
+    width: 73px;
+    height: 27px;
+    border-radius: 5px;
+    background-color: rgba(18, 77, 274, 0);
+    line-height: 27px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    letter-spacing: 0em;
+    color: rgba(255, 255, 255, 0);
+}
+/* #DeleteConfirmText.InactivePopupWindow,
 #DeleteConfirmText.InactivePopupWindow #DeleteText,
 #DeleteConfirmText.InactivePopupWindow #CancelText {
-    display: none;
+    transition-duration: 0.2s;
+} */
+
+/* ↓作業中 */
+/* 削除完了テキスト */
+#DeleteCompleteText {
+    pointer-events: none;
+    position: absolute;
+    top: 273px;
+    left: 64px;
+    width: 300px;
+    height: 130px;
+    border-radius: 8px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.35);
+    line-height: 75px;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: 0em;
+    color: rgb(51, 51, 51);
+    animation-name: fadeOutDeleteCompleteText;
+    animation-duration: 1s;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;      
 }
+@keyframes fadeOutDeleteCompleteText {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+
 
 /* transformテスト */
 .transform {
