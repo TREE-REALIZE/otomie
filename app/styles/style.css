@@ -754,7 +754,7 @@ body {
 
 /* 削除確認テキスト-非アクティブ状態 */
 #DeleteConfirmText.InactivePopupWindow {
-    pointer-events: auto;
+    pointer-events: none; /* 見えない時に押せないように */
     position: absolute;
     top: 294.5px;
     left: 114px;
