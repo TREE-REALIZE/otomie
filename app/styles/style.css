@@ -463,8 +463,9 @@ body {
     width: 100%;
     line-height: 20px;
     text-align: left;
-    font-family: sans-serif;
-    font-weight: 500;
+    /* font-family: sans-serif; */
+    font-family: "ヒラギノ丸ゴ Pro W4","Hiragino Maru Gothic Pro";
+    font-weight: normal;
     font-size: 20px;
     letter-spacing: 0em;
     color: rgb(127, 127, 127);
