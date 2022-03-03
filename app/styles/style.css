@@ -1,12 +1,13 @@
 @charset "UTF-8";
 
-/* 位置、組み、サイズ、形、線、色 */
-
+html {
+    touch-action: manipulation; /*ダブルタップ無効(効いてない?)*/
+}
 
 body {
     position: relative;
     user-select: none;
-    -webkit-user-select: none; /* Chrome, Safari, and Opera */
+    -webkit-user-select: none; /* Chrome, Safari, and Opera 選択無効*/
     margin: 0;
     /* あとで消す */
     background-color: rgb(204, 204, 204);
@@ -878,11 +879,4 @@ body {
         opacity: 0;
         transform: translateY(-80px);
     }
-}
-
-
-
-/* transformテスト */
-.transform {
-    transform: scale(2, 2) translate(-50%, -50%);
 }
