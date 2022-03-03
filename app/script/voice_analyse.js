@@ -16,18 +16,9 @@ let playBarWidth;
 let playBarHeadPos;
 
 //音源保存用変数
-// let localMediaStream = null;
-// let localScriptProcessor = null;
 let audioCtx;                                   //オーディオコンテキスト格納変数
 const bufferSize = 1024;                          //音源データ用バッファサイズ
-let bufferData;                                 //音源データ用バッファ
-
 let playAudioCtx;                               //再生用オーディオコンテキスト
-
-let spectrums;                                  //周波数ごとのデータを保存する配列
-let timeDomainArray;                            //時間領域ごとのデータを保存する配列
-
-let sharpness = 0;
 
 //状態管理
 let isCollecting = false;                       //収音中
@@ -36,7 +27,6 @@ let isPlaying = false;                          //再生中
 
 //描画スイッチ
 let isDrawRealTime = false;
-
 let audioAnalyser;
 
 let dataIndex = 0;                              //再生中dataListを順に見るためのIndex
@@ -84,7 +74,7 @@ window.addEventListener("load", () => {
 
 const startCollecting = (_micOnCB = {}) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    debugLog("startCollecting");
+    //debugLog("startCollecting");
     // サンプルレートを保持しておく
     isCollecting = true;
     const promise = navigator.mediaDevices.getUserMedia(
@@ -97,7 +87,7 @@ const startCollecting = (_micOnCB = {}) => {
     );
 
     promise.then(sucsess)
-    .then(error);
+        .then(error);
 
     function sucsess(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
         // 音声入力関連のノードの設定
@@ -110,45 +100,45 @@ const startCollecting = (_micOnCB = {}) => {
         // 音声解析関連のノードの設定
         audioAnalyser = audioCtx.createAnalyser();
         audioAnalyser.fftSize = 2048;
-        fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
-
+        fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;
         scriptProcessor.onaudioprocess = onAudioProcess;
-
         scriptProcessor.connect(audioCtx.destination);
-
-        //frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
-        //timeDomainData = new Uint8Array(audioAnalyser.fftSize);
         mediastreamsource.connect(audioAnalyser);
-
+        createJsonDataFormat();
+        _micOnCB.onReady(true);
     };
     function error(e) {
-        debugLog(e);
+        //debugLog(e);
     };
 
-    createJsonDataFormat();
 
-    _micOnCB.onReady(true);
 };
 
 // 録音バッファ作成（録音中自動で繰り返し呼び出される）
 const onAudioProcess = (e) => {
     if (audioLastTime < 0) {
         audioLastTime = audioCtx.currentTime;
-        spectrums = new Uint8Array(audioAnalyser.frequencyBinCount);        //周波数領域の振幅データ格納用配列を生成
-        timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
         return;
     }
     if (!isCollecting) {
         return;
     }
+    let spectrums = new Uint8Array(audioAnalyser.frequencyBinCount);        //周波数領域の振幅データ格納用配列を生成
+    let timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
+
     let input = e.inputBuffer.getChannelData(0);    //PCMデータ：信号の強度が格納されている.
-    bufferData = new Float32Array(input);
-    analyseVoice(spectrums, timeDomainArray);
+    let bufferData = new Float32Array(input);
+    analyseVoice(bufferData, spectrums, timeDomainArray);
     sampleArea.innerHTML = ((performance.memory.usedJSHeapSize) / 1000000).toFixed(0) + "MBytes";
+
+    delete input;
+    delete bufferData;
+    delete spectrums;
+    delete timeDomainArray;
 };
 
 //解析用処理
-const analyseVoice = (_spectrums, _timeDomainArray) => {
+const analyseVoice = (_bufferData, _spectrums, _timeDomainArray) => {
     // fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
 
     let audioDeltaTime = audioCtx.currentTime - audioLastTime;
@@ -166,15 +156,24 @@ const analyseVoice = (_spectrums, _timeDomainArray) => {
 
     audioAnalyser.getByteFrequencyData(_spectrums);                      //周波数領域の振幅データを配列に格納：一瞬の値
     audioAnalyser.getByteTimeDomainData(_timeDomainArray);               //時間領域の振幅データを配列に格納
-    let frameDataObj = createFrameDataObj(bufferData, _spectrums, _timeDomainArray, audioDeltaTime);                            //1フレーム分のデータ生成
+
+
+    let frameDataObj = createFrameDataObj(_bufferData, _spectrums, _timeDomainArray, audioDeltaTime);                            //1フレーム分のデータ生成
     createData(frameDataObj);
+
     let dataIndex = data["dataList"].length - 1;
+
 
     drawRTGraphic(frameDataObj, drawRealTimeCB);
     drawRectangle(data, dataIndex, canvasTL);
     countRecTime(audioDeltaTime, recordingCB);
     judgeRecTime(recordingCB);
-    frameDataObj = null;
+
+    delete audioDeltaTime;
+    delete _spectrums;
+    delete _bufferData;
+    delete _timeDomainArray;
+    delete frameDataObj;
 
 }
 
@@ -187,7 +186,8 @@ const createJsonData = (_data) => {
 //受けとったJsonデータをオブジェクトにへんかんする．
 const decordeJsonDataList = (_jsonData) => {
     playingData = JSON.parse(_jsonData);
-    _jsonData = null;
+    console.log(playingData["dataList"].length);
+    delete _jsonData;
 }
 
 
@@ -198,7 +198,7 @@ const prepareRec = (_initRecCB) => {
 };
 
 const startRecording = (_recordingCB) => {
-    //debugLog("startRecorging");
+    ////debugLog("startRecorging");
     if (!isRecording) {
         startRecTime = performance.now() - (beforeStorageTime * 1000);
         recTime = 0;
@@ -239,9 +239,13 @@ const stopRecording = (_canvas, _stopRecCB) => {
         recTime = 0;
         let jsonData = {};
         jsonData = createJsonData(data);
+
+        // playingData = data;
         createJsonDataFormat();
+        console.log("data.dataList", data.dataList.length);
         decordeJsonDataList(jsonData);
 
+        delete jsonData;
         initBars();
         //再生用のオーディオコンテキストを作る．
         playAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -271,13 +275,12 @@ const playDataList = (_canvas, callback) => {
                 //◇収録データの再生を開始
                 if (playAudioCtx.state !== "suspended") {
                     dataIndex = -1;
-                    debugLog("playAudioCtx state", playAudioCtx.state);
-                    console.log(PCMData);
+                    //debugLog("playAudioCtx state", playAudioCtx.state);
                     playPCMData(PCMData);
                 }
                 else {
-                    debugLog("playAudioCtx.resume");
-                    debugLog("playAudioCtx", playAudioCtx);
+                    //debugLog("playAudioCtx.resume");
+                    //debugLog("playAudioCtx", playAudioCtx);
                     playAudioCtx.resume();
                 }
 
@@ -325,7 +328,7 @@ const initBars = () => {
     for (let i = 0; i < _bars.length; i++) {
         playBars[i] = _bars[i];
     }
-    _bars = null;
+    delete _bars;
     playBars = playBars.filter((element) => {
         if (element.time >= startRecTime && element.time <= stopRecTime) {
             return true;
@@ -361,12 +364,15 @@ const playPCMData = (PCMdata) => {
 const getPCMData = (_playingData) => {
     let PCMData = [];
     let result = [];
-    for (let i = 0; i < _playingData["dataList"].length - 1; i++) {
+    let length = _playingData["dataList"].length - 1;
+    // PCMData = _playingData;
+    for (let i = 0; i < length; i++) {
         PCMData.push(_playingData["dataList"][i]["raw"]["PCM"]);
     }
     PCMData.forEach(element => {
         result = result.concat(Object.values(element));
     });
+    delete PCMData;
     return result;
 }
 
@@ -392,7 +398,7 @@ const stopDataList = (_stopPlayingCB) => {
 
 const restartDataList = (_restartPlayingCB) => {
     if (!isRecording) {
-        debugLog("restartDataList");
+        //debugLog("restartDataList");
         isPlaying = false;
         dataIndex = -1;
         playAudioCtx.suspend();
@@ -493,23 +499,38 @@ const createFrameDataObj = (bufferData, spectrums, timeDomainArray, audioDeltaTi
     visual.saturation = volumePeak / 255;
     visual.brightness = pitch;
     visual.objectCount = calcObjectCount(pitch, volume);
-    visual.objectCount = pitch;
+    visual.objectCount = 1;
     visual.objectShape = pitch;
+    // visual.objectShape = value;
+
+
     visual.speed = pitch * 0.1;
 
     frameData.raw = raw;
     frameData.visual = visual;
 
-    raw = null;
-    visual = null;
-    frequency = null;
-    frequencyPeak = null;
-    volumePeak = null;
-    roughness = null;
-
+    delete raw;
+    delete visual;
+    delete frequency;
+    delete frequencyPeak;
+    delete volumePeak;
+    delete roughness;
     return frameData;
-
 }
+
+let count = 0;
+let value = 0;
+const conuntUP = () => {
+    count += 1.01;
+    value = count % 6;
+    value = value / 6;
+
+    // return value;    
+}
+
+setInterval(conuntUP, 1000);
+
+
 
 const calcHue = (_sharpness) => {
     let hue = 360 * (Math.abs(_sharpness - 0.5) * 2) / 360;
@@ -618,7 +639,7 @@ const getNumPlayingData = () => {
         numPlayingData = 0;
         // thumbnail = "none";
     }
-    debugLog("numPlayingData" + numPlayingData);
+    //debugLog("numPlayingData" + numPlayingData);
     return numPlayingData;
 };
 
@@ -630,7 +651,7 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
     let drawTime;
 
     if (isPlaying) {
-        debugLog("isPlaying", isPlaying);
+        //debugLog("isPlaying", isPlaying);
 
         if (dataIndex == -1) {
             dataIndex = 0;
@@ -643,6 +664,7 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
             progressBarContainer.splice(0);
             progressBarContainer.push(new progressBar(playBarHeadPos, 0, 1, canvasPB.height));
             progressBarContainer[0].render(canvasPBCtx);
+            console.log(data["dataList"].length);
         }
 
         drawTime = (performance.now() / 1000) - startPlayTime;
@@ -669,7 +691,8 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
 
             dataIndex += 1;
             let n_index = dataIndex / (data["dataList"].length - 1);
-
+            // console.log(dataIndex);
+            // console.log(n_index);
             progressBarContainer[0].x = (n_index * playBarWidth) + playBarHeadPos;
             canvasPBCtx.clearRect(0, 0, canvasPB.width, canvasPB.height);
             playBars.forEach((element) => {
