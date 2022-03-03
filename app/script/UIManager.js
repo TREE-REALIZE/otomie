@@ -41,7 +41,7 @@ const clickedConceptCard = () => {
     sliderContent[1].classList.add('SlideHowtoAnim01');
     sliderContent[2].classList.add('SlideHowtoAnim01');
 };
-conceptCard.addEventListener('click', clickedConceptCard);
+conceptCard.addEventListener('touchend', clickedConceptCard);
 
 // Howto画面 - マイクの設定カードクリックで処理
 const micOnCard = document.getElementById("MicOnCard");
@@ -55,7 +55,7 @@ const changeStartCard = () => {
 const clickedMicOnCard = () => {
     micOn(micOnCallBack);
 };
-micOnCard.addEventListener('click', clickedMicOnCard);
+micOnCard.addEventListener('touchend', clickedMicOnCard);
 
 const canvasRealTime = document.getElementById('CanvasRealTime');
 const visualRealTime = document.getElementById('VisualRealTime');
@@ -103,14 +103,14 @@ const displayNoneStartCard = () => {
     howToWindow.classList.add('Displaynone');
 };
 // はじめましょう画面クリックイベント
-startCard.addEventListener('click', clickedStartCard);
+startCard.addEventListener('touchend', clickedStartCard);
 
 //サムネイル画像
 const thumbnailImage = document.getElementById('ThumbnailImage');
 let thumbnailSrc; //サムネイル画像のデータ変数
 // サムネイル画像を入れ替える関数
 const changethumbnail = (thumbnailSrc) => {
-    thumbnailImage.style.backgroundImage =  thumbnailSrc;
+    thumbnailImage.style.backgroundImage = thumbnailSrc;
 };
 // getArchiveコールバック
 const getArchiveCallBack = {
@@ -137,8 +137,8 @@ const getArchiveCallBack = {
     },
     getImage: (thumbnailImg) => {
         console.log('UI通知-getArchive-サムネイル画像を入れます');
-        CanvasRecMovie.style.backgroundImage =  "url(" + thumbnailImg + ")";
-        thumbnailSrc =  "url(" + thumbnailImg + ")"; //サムネイル画像のデータ変数差し替え
+        CanvasRecMovie.style.backgroundImage = "url(" + thumbnailImg + ")";
+        thumbnailSrc = "url(" + thumbnailImg + ")"; //サムネイル画像のデータ変数差し替え
         if (CanvasRecMovie.hasChildNodes() == true) { //子要素がいるなら
             console.log('UI通知-CanvasRecMovieは子要素持っている');
             CanvasRecMovie.firstChild.classList.add('Displaynone'); //CanvasRecMovieの子を見た目OFF
@@ -203,7 +203,7 @@ const recClick = () => {
         stopRec(CanvasRecMovie, stopRecCallBack); //収録停止
     }
 }
-buttonStartRec.addEventListener('click', recClick);
+buttonStartRec.addEventListener('touchend', recClick);
 // initRecコールバック
 const initRecCallBack = {
     onReady: (tf) => {
@@ -242,6 +242,25 @@ const recordingCallBack = {
         }
     }
 };
+
+let year;
+let month;
+let date;
+let hour;
+let minute;
+const recDateTimeText = document.getElementById('RecDateTimeText');
+// 時間をUIに反映
+const changeRecDateTime = () => {
+    recDateTimeText.innerText = year + '年' + month + '月' + date + '日 ' + hour + ':' + minute;
+};
+// 1桁の数字を0埋めで2桁にする
+const toDoubleDigits = (num) => {
+    num += "";
+    if (num.length === 1) {
+        num = "0" + num;
+    }
+    return num;
+};
 // stopRecコールバック
 const stopRecCallBack = {
     onReady: (tf) => {
@@ -256,6 +275,16 @@ const stopRecCallBack = {
         else {
             console.log("UI通知-stopRec-収録が停止できませんでした×");
         }
+    },
+    getRecTime: (recTime) => {
+        console.log("UI通知-stopRec-収録時の時間を取得しました〇");
+        let dateTime = new Date(recTime); //Dateオブジェクトを使ってオブジェクト化
+        year = dateTime.getFullYear();
+        month = dateTime.getMonth() + 1;
+        date = dateTime.getDate();
+        hour = dateTime.getHours();
+        minute = toDoubleDigits(dateTime.getMinutes()); //取得した上で一桁なら二桁に
+        changeRecDateTime(); //UIに反映
     }
 };
 
@@ -325,7 +354,7 @@ const changePlayerWindowFunc = () => {
     defenceClick(); //クリック抑止
     thumbnailImage.classList.add('Displaynone'); //サムネイル画像を消す
 };
-CanvasRecMovie.addEventListener('click', changePlayerWindowFunc);
+CanvasRecMovie.addEventListener('touchend', changePlayerWindowFunc);
 // 再生画面が再生状態になるアニメ終わったら呼ばれる
 recContainer.addEventListener('transitionend', () => {
     if (recContainer.classList.contains('RecPlayer') == true) {
@@ -359,7 +388,7 @@ const restartPlayingCallBack = {
         }
     }
 };
-btnBackToRecWindow.addEventListener('click', clickedBackToRecWindowBtn);
+btnBackToRecWindow.addEventListener('touchend', clickedBackToRecWindowBtn);
 // 〇〇〇〇再生画面 - 右下削除ボタン押してポップアップウインドウ表示・非表示 ------------------------------------------
 const btnDeleteMovie = document.getElementById('ButtonDeleteMovie');
 const deleteConfirmText = document.getElementById('DeleteConfirmText');
@@ -379,7 +408,7 @@ const clickedDeleteConfirmBtn = () => {
         stopPlaying(stopPlayingCallBack); //停止
     }
 };
-btnDeleteMovie.addEventListener('click', clickedDeleteConfirmBtn);
+btnDeleteMovie.addEventListener('touchend', clickedDeleteConfirmBtn);
 
 // --- キャンセル押したら非表示
 const cancelText = document.getElementById('CancelText');
@@ -389,14 +418,14 @@ const clickedCancelText = () => {
     removeGrayBackColor(); //抑止板灰色を解除
     toggleDeleteConfirm(); //ポップアップ非表示
 }
-cancelText.addEventListener('click', clickedCancelText);
+cancelText.addEventListener('touchend', clickedCancelText);
 // 削除ボタン押されらまず呼ばれる関数
 const clickedDeleteTextBtn = () => {
     deleteData(deleteDataCallBack);
 };
 // --- 削除押したら再生画面を収録状態にする
 const deleteText = document.getElementById('DeleteText');
-deleteText.addEventListener('click', clickedDeleteTextBtn);
+deleteText.addEventListener('touchend', clickedDeleteTextBtn);
 
 const deleteCompleteText = document.getElementById('DeleteCompleteText');
 // deleteDataコールバック
@@ -437,7 +466,7 @@ const clickedPlayStopBtn = () => {
         stopPlaying(stopPlayingCallBack); //停止
     }
 };
-btnStartPlay.addEventListener('click', clickedPlayStopBtn);
+btnStartPlay.addEventListener('touchend', clickedPlayStopBtn);
 // playコールバック
 const playCallBack = {
     onReady: (tf) => {
