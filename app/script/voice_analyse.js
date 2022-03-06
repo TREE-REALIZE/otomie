@@ -186,10 +186,9 @@ const createJsonData = (_data) => {
 //受けとったJsonデータをオブジェクトにへんかんする．
 const decordeJsonDataList = (_jsonData) => {
     playingData = JSON.parse(_jsonData);
-    console.log(playingData["dataList"].length);
+    // console.log(playingData["dataList"].length);
     delete _jsonData;
 }
-
 
 const prepareRec = (_initRecCB) => {
     playingData = null;
@@ -200,6 +199,7 @@ const prepareRec = (_initRecCB) => {
 const startRecording = (_recordingCB) => {
     ////debugLog("startRecorging");
     if (!isRecording) {
+        isRecording = true;
         startRecTime = performance.now() - (beforeStorageTime * 1000);
         recTime = 0;
 
@@ -208,9 +208,9 @@ const startRecording = (_recordingCB) => {
         data.samplingRate = audioCtx.sampleRate;
         data.fsDivN = fsDivN;
 
-        //収録開始時のサムネイル取得
-        let frameData = data["dataList"][data["dataList"].length - 1]["visual"];
-        thumbnail = otomieVisual.takeScreenShot(frameData);
+        // //収録開始時のサムネイル取得
+        // let frameData = data["dataList"][data["dataList"].length - 1]["visual"];
+        // //thumbnail = otomieVisual.takeScreenShot(frameData);
 
         //再生用のインデックスをリセット
         dataIndex = -1;
@@ -239,10 +239,12 @@ const stopRecording = (_canvas, _stopRecCB) => {
         recTime = 0;
         let jsonData = {};
         jsonData = createJsonData(data);
-
+        //収録開始時のサムネイル取得
+        let frameData = data["dataList"][0]["visual"];
+        thumbnail = otomieVisual.takeScreenShot(frameData);
         // playingData = data;
         createJsonDataFormat();
-        console.log("data.dataList", data.dataList.length);
+        // console.log("data.dataList", data.dataList.length);
         decordeJsonDataList(jsonData);
 
         delete jsonData;
@@ -252,6 +254,8 @@ const stopRecording = (_canvas, _stopRecCB) => {
         showPlayBars(canvasPB);
 
         PCMData = getPCMData(playingData);
+
+
 
         _stopRecCB.onReady(true);
         _stopRecCB.onComplete(true);
@@ -485,7 +489,6 @@ const createFrameDataObj = (bufferData, spectrums, timeDomainArray, audioDeltaTi
     visual.objectShape = 0;
     visual.speed = 0;
 
-    // visual.pitch = N_spectrumPeak;
 
     let pitch = Math.min(pitchMax, Math.max(frequencyPeak, pitchMin));   //クリッピング
     pitch = (frequencyPeak - pitchMin) / (pitchMax - pitchMin);      //正規化
@@ -499,7 +502,7 @@ const createFrameDataObj = (bufferData, spectrums, timeDomainArray, audioDeltaTi
     visual.saturation = volumePeak / 255;
     visual.brightness = pitch;
     visual.objectCount = calcObjectCount(pitch, volume);
-    visual.objectCount = 1;
+    // visual.objectCount = 0;
     visual.objectShape = pitch;
     // visual.objectShape = value;
 
@@ -664,7 +667,7 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
             progressBarContainer.splice(0);
             progressBarContainer.push(new progressBar(playBarHeadPos, 0, 1, canvasPB.height));
             progressBarContainer[0].render(canvasPBCtx);
-            console.log(data["dataList"].length);
+            // console.log(data["dataList"].length);
         }
 
         drawTime = (performance.now() / 1000) - startPlayTime;
