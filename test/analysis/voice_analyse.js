@@ -181,8 +181,6 @@ const getPCMData = (_playingData) => {
     let PCMData = [];
     for (let i = 0; i < _playingData["dataList"].length - 1; i++) {
         PCMData.push(_playingData["dataList"][i]["raw"]["PCM"]);
-
-
     }
     debugLog("PCMData", PCMData);
 
@@ -232,11 +230,6 @@ const playDataList = (_canvas) => {
                 isPlaying = true;
                 dataIndex = -1;
                 animateCanvases(_canvas);
-
-                //◇収録データの再生を開始
-
-
-
             }
         }
     } else {
@@ -279,24 +272,17 @@ const onAudioProcess = (e) => {
 };
 
 
-const setCallBack = (_obj = {}, _CBObj = {}) => {
-    // _obj.onReady = _CBObj.onReady;
-    // _obj.onProcess = _CBObj.onProcess;
-    // _obj.onComplete = _CBObj.onComplete;
 
-}
 
-const startCollecting = (_callback = {}) => {
+const startCollecting = (_callback) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    debugLog("startCollecting");
     // サンプルレートを保持しておく
     isCollecting = true;
-    const promise = navigator.mediaDevices.getUserMedia(medias);
-
-    promise.then(sucsess)
+    const promise = navigator.mediaDevices.getUserMedia(medias);    //メディアアクセス要求をする。
+    promise.then(sucsess);                                                       
     //.then(error);
 
-    function sucsess(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
+    function sucsess(stream) {                                      //メディアアクセス要求が承認されたときに呼ばれる関数
         // 音声入力関連のノードの設定
 
         localMediaStream = stream;

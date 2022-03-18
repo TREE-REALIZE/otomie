@@ -45,7 +45,6 @@ const micOn = ({
     onComplete = () => { }
 } = {}) => {
     debugLog("micON called");
-
     //マイクをONにする処理  
     startCollecting({ onReady, onComplete });
 }
@@ -60,11 +59,8 @@ const drawRealTime = (_canvas, _canvasTL, _canvasPB, {
 } = {}) => {
 
     //リアルタイム描画する処理
-
-
     switchRealTime(_canvas, _canvasTL, { onReady, onProcess, onComplete });
     initCanvasPB(_canvasPB);
-
 }
 
 const getArchive = (_canvas, {
@@ -87,24 +83,14 @@ const getArchive = (_canvas, {
             getImage(thumbnail);
         }
         onComplete(true);
-
     }
-
 }
 
 const initRec = ({
     onReady = () => { },
     onComplete = () => { },
 } = {}) => {
-
-    //収録データを取得する処理
-    // ・
-    // ・
-    // ・
-    debugLog("initRec");
-    // setCallBack(initRecCB,{onReady,onComplete});
     prepareRec({ onReady, onComplete });
-
 }
 
 
@@ -158,14 +144,11 @@ const restartPlaying = ({
 
 }
 
-
-
 const deleteData = ({
     onReady = () => { },
     onComplete = () => { },
 }) => {
     debugLog("deleteData");
     deletePlayingData({ onReady, onComplete });
-
 }
 

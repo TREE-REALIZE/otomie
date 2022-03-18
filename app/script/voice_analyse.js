@@ -11,6 +11,9 @@ const pitchMin = 27.0;                          //周波数クリッピング下
 let startPlayTime = 0;
 let startRecTime = 0;
 let stopRecTime = 0;
+let startCollectingTime = 0;                    //収録
+let recTime = 0;                                //収録時間格納用変数
+let audioLastTime = -1;
 
 let playBarWidth;
 let playBarHeadPos;
@@ -33,11 +36,6 @@ let dataIndex = 0;                              //再生中dataListを順に見�
 let playingData = {};                           //再生用データ
 let fsDivN;                                     //周波数分解能(何ヘルツおきに点を配置するか)
 
-let startCollectingTime = 0;
-let recTime = 0;
-
-let audioLastTime = -1;
-
 let data = {};
 let dataList = [];
 
@@ -50,8 +48,11 @@ let progressBarContainer = [];
 let drawRealTimeCB = {};
 let recordingCB = {};
 
+//タイムラインキャンバス
 let canvasTL;
 let canvasTLCtx;
+
+//再生中プログレスバーキャンバス
 let canvasPB;
 let canvasPBCtx;
 
@@ -66,16 +67,9 @@ const ph = 2;
 const otomieVisual_Rec = new OtomieVisual();
 
 
-// let sampleArea = null
-// window.addEventListener("load", () => {
-//     sampleArea = document.querySelector('#sampleArea');
-// })
-
-
-const startCollecting = (_micOnCB = {}) => {
+const startCollecting = (_micOnCB) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     //debugLog("startCollecting");
-    // サンプルレートを保持しておく
     isCollecting = true;
     const promise = navigator.mediaDevices.getUserMedia(
         {
@@ -86,14 +80,12 @@ const startCollecting = (_micOnCB = {}) => {
         }
     );
 
-    promise.then(sucsess)
-        .then(error);
+    promise.then(success);
+        // .then(error);
 
-    function sucsess(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
+    function success(stream) {       //メディアアクセス要求が承認されたときに呼ばれる関数
         // 音声入力関連のノードの設定
-        // localMediaStream = stream;
         let scriptProcessor = audioCtx.createScriptProcessor(bufferSize, 1, 1);
-        // localScriptProcessor = scriptProcessor;
         let mediastreamsource = audioCtx.createMediaStreamSource(stream);
         mediastreamsource.connect(scriptProcessor);
 
@@ -101,20 +93,19 @@ const startCollecting = (_micOnCB = {}) => {
         audioAnalyser = audioCtx.createAnalyser();
         audioAnalyser.fftSize = 2048;
         fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;
-        scriptProcessor.onaudioprocess = onAudioProcess;
+        
         scriptProcessor.connect(audioCtx.destination);
         mediastreamsource.connect(audioAnalyser);
         createJsonDataFormat();
+        scriptProcessor.onaudioprocess = onAudioProcess;
         _micOnCB.onReady(true);
     };
-    function error(e) {
-        //debugLog(e);
-    };
-
-
+    // function error(e) {
+    //     //debugLog(e);
+    // };
 };
 
-// 録音バッファ作成（録音中自動で繰り返し呼び出される）
+// 録音バッファ作成（収音中自動で繰り返し呼び出される）
 const onAudioProcess = (e) => {
     if (audioLastTime < 0) {
         audioLastTime = audioCtx.currentTime;
@@ -125,11 +116,11 @@ const onAudioProcess = (e) => {
     }
     let spectrums = new Uint8Array(audioAnalyser.frequencyBinCount);        //周波数領域の振幅データ格納用配列を生成
     let timeDomainArray = new Uint8Array(audioAnalyser.fftSize);            //時間領域の振幅データ格納用配列を生成
-
-    let input = e.inputBuffer.getChannelData(0);    //PCMデータ：信号の強度が格納されている.
+    let input = e.inputBuffer.getChannelData(0);                            //PCMデータ：信号の強度をfloat32Arrayを返す。
+    // console.log("input",input);                                             //float32Array(1024);
     let bufferData = new Float32Array(input);
+    // console.log("bufferData",bufferData)
     analyseVoice(bufferData, spectrums, timeDomainArray);
-    // sampleArea.innerHTML = ((performance.memory.usedJSHeapSize) / 1000000).toFixed(0) + "MBytes";
 
     delete input;
     delete bufferData;
@@ -139,20 +130,8 @@ const onAudioProcess = (e) => {
 
 //解析用処理
 const analyseVoice = (_bufferData, _spectrums, _timeDomainArray) => {
-    // fsDivN = audioCtx.sampleRate / audioAnalyser.fftSize;           //周波数分解能
-
     let audioDeltaTime = audioCtx.currentTime - audioLastTime;
     audioLastTime = audioCtx.currentTime;
-    // let tracks = localMediaStream.getTracks();
-    // for (let i = 0; i < tracks.length; i++) {
-
-    //     let constraints = tracks[i].getConstraints()
-
-    //     // 音声トラックの制約
-    //     if (tracks[i].kind == 'audio') {
-    //     }
-    // }
-
 
     audioAnalyser.getByteFrequencyData(_spectrums);           //周波数領域の振幅データを配列に格納：一瞬の値
     audioAnalyser.getByteTimeDomainData(_timeDomainArray);    //時間領域の振幅データを配列に格納
@@ -161,7 +140,6 @@ const analyseVoice = (_bufferData, _spectrums, _timeDomainArray) => {
     createData(frameDataObj);
 
     let dataIndex = data["dataList"].length - 1;
-
 
     drawRTGraphic(frameDataObj, drawRealTimeCB);
     drawRectangle(data, dataIndex, canvasTL);
@@ -173,7 +151,6 @@ const analyseVoice = (_bufferData, _spectrums, _timeDomainArray) => {
     delete _bufferData;
     delete _timeDomainArray;
     delete frameDataObj;
-
 }
 
 //dataをJsonにする
@@ -207,10 +184,6 @@ const startRecording = (_recordingCB) => {
         data.samplingRate = audioCtx.sampleRate;
         data.fsDivN = fsDivN;
 
-        // //収録開始時のサムネイル取得
-        // let frameData = data["dataList"][data["dataList"].length - 1]["visual"];
-        // //thumbnail = otomieVisual.takeScreenShot(frameData);
-
         //再生用のインデックスをリセット
         dataIndex = -1;
 
@@ -223,6 +196,7 @@ const startRecording = (_recordingCB) => {
 };
 
 let PCMData;
+//UI側からの命令で収録をストップする
 const stopRecording = (_canvas, _stopRecCB) => {
     if (isRecording) {
         if (_canvas.hasChildNodes() == false) {
@@ -236,29 +210,26 @@ const stopRecording = (_canvas, _stopRecCB) => {
 
         dataList = [];
         recTime = 0;
-        let jsonData = {};
-        jsonData = createJsonData(data);
-        //収録開始時のサムネイル取得
-        let frameData = data["dataList"][0]["visual"];
-        thumbnail = otomieVisual.takeScreenShot(frameData);
-        // playingData = data;
-        createJsonDataFormat();
-        // console.log("data.dataList", data.dataList.length);
-        decordeJsonDataList(jsonData);
 
-        delete jsonData;
+        // let jsonData = {};
+        // jsonData = createJsonData(data);
+        // decordeJsonDataList(jsonData);
+        // delete jsonData;
+        
+        playingData = data;
+        createJsonDataFormat();
+
+        let frameData = data["dataList"][0]["visual"];          //0フレーム目のフレームデータ取得.
+        thumbnail = otomieVisual.takeScreenShot(frameData);     //0フレーム目でのサムネイルを取得.
+
         initBars();
         //再生用のオーディオコンテキストを作る．
         playAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
         showPlayBars(canvasPB);
-
         PCMData = getPCMData(playingData);
-
-
 
         _stopRecCB.onReady(true);
         _stopRecCB.onComplete(true);
-
     }
 }
 
@@ -304,18 +275,15 @@ const showPlayBars = (_canvas) => {
     let canvasPBCtx = canvasPB.getContext("2d");
     let startPoint = _canvas.width - margin;
     let endPoint = margin;
-    let timeLineCanvasWidth = startPoint - endPoint;
-    let playBarsCenter = playBarWidth / 2;
-    let timeLineCvsCenter = timeLineCanvasWidth / 2;
-    let substitute = playBarsCenter - timeLineCvsCenter;
-    //キャンバスの幅を算出→キャンバスの真ん中の値を算出
-    //playBars真ん中―キャンバスの真ん中の値算出
-    //playBarsの全要素を差分うごかす。
+    let timeLineCanvasWidth = startPoint - endPoint;        //キャンバスの幅を算出
+    let playBarsCenter = playBarWidth / 2;                  //→キャンバスの真ん中の値を算出
+    let timeLineCvsCenter = timeLineCanvasWidth / 2;        //playBars真ん中の値算出
+    let substitute = playBarsCenter - timeLineCvsCenter;    //キャンバスの真ん中の値算出
 
     canvasPBCtx.clearRect(0, 0, canvasPB.width, canvasPB.height);
     playBars.forEach((element) => {
         element.stop();
-        element.x = element.x + substitute;
+        element.x = element.x + substitute;                 //playBarsの全要素を差分うごかす。
         element.render(canvasPBCtx);
     });
 
@@ -520,17 +488,17 @@ const createFrameDataObj = (bufferData, spectrums, timeDomainArray, audioDeltaTi
     return frameData;
 }
 
-let count = 0;
-let value = 0;
-const conuntUP = () => {
-    count += 1.01;
-    value = count % 6;
-    value = value / 6;
+// let count = 0;
+// let value = 0;
+// const conuntUP = () => {
+//     count += 1.01;
+//     value = count % 6;
+//     value = value / 6;
 
-    // return value;    
-}
+//     // return value;
+// }
 
-setInterval(conuntUP, 1000);
+// setInterval(conuntUP, 1000);
 
 
 
@@ -564,16 +532,17 @@ const createData = (_frameData) => {
 const switchRealTime = (_canvas, _canvasTL, _drawRealTimeCB) => {
     drawRealTimeCB = _drawRealTimeCB;
 
-    if (isDrawRealTime == false) {
-
+    if (!isDrawRealTime) {
         isDrawRealTime = true;
         canvasTL = _canvasTL;
         canvasTLCtx = canvasTL.getContext("2d");
+        
+        //タイムラインを表示
         pushBar(canvasTL.width - margin, canvasTL.height / 2, 0, 0, getBarVelocity(), 'rgb(0, 0, 0)', performance.now());
-
         drawEndBar();
+        
+        //コールバック
         drawRealTimeCB.onReady(true);
-        //◇リアルタイム描画開始処理
     }
     else if (isDrawRealTime == true) {
         isDrawRealTime = false;
@@ -581,10 +550,8 @@ const switchRealTime = (_canvas, _canvasTL, _drawRealTimeCB) => {
 }
 
 const drawRTGraphic = (_frameData, _drawRealTimeCB) => {
-    if (isDrawRealTime == true) {
-
+    if (isDrawRealTime) {
         if (!isPlaying) {
-
             otomieVisual.updateSoundData(_frameData["visual"]);
             _drawRealTimeCB.onProcess(isDrawRealTime);
         } else {
@@ -626,7 +593,6 @@ const deletePlayingData = (_deleteDataCB) => {
         playingData = {};
         _deleteDataCB.onReady(true);
         _deleteDataCB.onComplete(true);
-
     }
 }
 
@@ -753,10 +719,8 @@ const calcSharpness = (_frequency) => {
         bunsi += element * (index + 1);
         bumbo += element;
     })
-
     sharpness = bunsi / bumbo * fsDivN;
     return sharpness;
-
 }
 
 const getVolumePeak = (_data, _index) => {
@@ -801,9 +765,7 @@ const drawRectangle = (_data, _index, _canvas) => {
     const ctx = _canvas.getContext('2d');
     ctx.clearRect(0, 0, _canvas.width, _canvas.height);
     ctx.beginPath();
-
     let peak = getVolumePeak(_data, _index)["volume"];
-
     let barWidth = 1;
     //let x = canvas.width / dataList.length;
     let barHeight = (1 - (peak / 255)) * _canvas.height;
