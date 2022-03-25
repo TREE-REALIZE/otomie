@@ -242,6 +242,9 @@ const initRecCallBack = {
         }
     }
 };
+
+// --- 収録ボタンのテキストに時間いれる[1]
+const recCountText = document.getElementById('RecCountText');
 // UI側のカウント定義(渡ってきた数値を逆にするため)
 const countUI = 5;
 // recordingコールバック
@@ -277,10 +280,7 @@ let date;
 let hour;
 let minute;
 const recDateTimeText = document.getElementById('RecDateTimeText');
-// 時間をUIに反映
-const changeRecDateTime = () => {
-    recDateTimeText.innerText = year + '年' + month + '月' + date + '日 ' + hour + ':' + minute;
-};
+
 // 1桁の数字を0埋めで2桁にする
 const toDoubleDigits = (num) => {
     num += "";
@@ -289,6 +289,21 @@ const toDoubleDigits = (num) => {
     }
     return num;
 };
+// 時間をUIに反映
+const changeRecDateTime = () => {
+    recDateTimeText.innerText = year + '年' + month + '月' + date + '日 ' + hour + ':' + minute;
+};
+// 取得時間を変換
+const convertRecDateTime = () => {
+    let dateTime = new Date(recTime); //Dateオブジェクトを使ってオブジェクト化
+    year = dateTime.getFullYear();
+    month = dateTime.getMonth() + 1;
+    date = dateTime.getDate();
+    hour = dateTime.getHours();
+    minute = toDoubleDigits(dateTime.getMinutes()); //取得した上で一桁なら二桁に
+    changeRecDateTime(); //UIに反映
+};
+
 // stopRecコールバック
 const stopRecCallBack = {
     onReady: (tf) => {
@@ -307,19 +322,11 @@ const stopRecCallBack = {
     },
     getRecTime: (recTime) => {
         //"UI通知-stopRec-収録時の時間を取得しました〇"
-        let dateTime = new Date(recTime); //Dateオブジェクトを使ってオブジェクト化
-        year = dateTime.getFullYear();
-        month = dateTime.getMonth() + 1;
-        date = dateTime.getDate();
-        hour = dateTime.getHours();
-        minute = toDoubleDigits(dateTime.getMinutes()); //取得した上で一桁なら二桁に
-        changeRecDateTime(); //UIに反映
+        convertRecDateTime(recTime); //取得時間を変換
     }
 };
 
 
-// --- 収録ボタンのテキストに時間いれる[1]
-const recCountText = document.getElementById('RecCountText');
 
 // --- 収録ボタンの色変更関数[2]
 const changeRecBtnColor = () => {
@@ -334,10 +341,9 @@ function startRecFunc() {
     isRecPlay = true; //収録中フラグON
 }
 
-// ----- 収録停止ボタンがおされたor0秒になったら呼ぶ関数
 let isWhiteOut = false;
 const whiteFadePanelOver = document.getElementById('WhiteFadePanelOver');
-// 初期化関数
+// 白フェード初期化関数
 const initFadeAnim = () => {
     if (whiteFadePanelOver.classList.contains('FadeInWhiteOverAnim') == true) {
         whiteFadePanelOver.classList.remove('FadeInWhiteOverAnim');
@@ -453,7 +459,6 @@ cancelText.addEventListener('touchend', clickedCancelText);
 const clickedDeleteTextBtn = () => {
     deleteData(deleteDataCallBack);
 };
-// --- 削除押したら再生画面を収録状態にする
 const deleteText = document.getElementById('DeleteText');
 deleteText.addEventListener('touchend', clickedDeleteTextBtn);
 
@@ -476,7 +481,7 @@ const deleteDataCallBack = {
 };
 deleteCompleteText.addEventListener('transitionend', () => {
     if (recContainer.classList.contains('Displaynone') == false) {
-        deleteCompleteText.classList.add('Displaynone'); //サムネイル画像を現す
+        deleteCompleteText.classList.add('Displaynone'); //削除完了テキストを消す
     }
 });
 
