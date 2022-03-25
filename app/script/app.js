@@ -1,50 +1,10 @@
-/**
-□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■
-◆UIManagere.js
 
-const onReady = (tf) => {
-    debugLog("onReady");
-    if (tf == true) {
-        debugLog("minOn success");
-    }
-    else {
-        debugLog("micOn not sucessed");
-    }
-}
-
-const micOnTouched = () => {
-    micOn({onReady});
-}
-□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■□■
- */
-
-
-
-// window.addEventListener("load", () => {
-//     getCanvases();
-
-//     document.querySelector("#TitleWindow").addEventListener("click", micOn);
-//     document.querySelector("#drawRealTime").addEventListener("click", ()=>{drawRealTime(canvasFrequency,{})});
-//     debugLog("canvasFrequency:   " + canvasFrequency);
-//     document.querySelector("#getArchive").addEventListener("click", getArchive);
-//     document.querySelector("#initRec").addEventListener("click", initRec);
-//     document.querySelector("#recording").addEventListener("click", recording);
-//     document.querySelector("#stopRec").addEventListener("click", stopRec);
-//     document.querySelector("#play").addEventListener("click", ()=>{play(A_canvasFrequency,{})});
-//     document.querySelector("#stopPlay").addEventListener("click", stopPlay);
-//     document.querySelector("#deleteData").addEventListener("click", deleteData);
-
-//     //document.querySelector("#ButtonOpenMovie").addEventListener("click", playDataList);
-
-//     debugLog("load finish");
-// });
 
 //◆ app.js
 const micOn = ({
     onReady = () => { },
     onComplete = () => { }
 } = {}) => {
-    debugLog("micON called");
     //マイクをONにする処理  
     startCollecting({ onReady, onComplete });
 }
@@ -60,7 +20,8 @@ const drawRealTime = (_canvas, _canvasTL, _canvasPB, {
 
     //リアルタイム描画する処理
     switchRealTime(_canvas, _canvasTL, { onReady, onProcess, onComplete });
-    initCanvasPB(_canvasPB);
+    canvasPB = _canvasPB;
+    canvasPBCtx = canvasPB.getContext("2d");
 }
 
 const getArchive = (_canvas, {
@@ -71,13 +32,8 @@ const getArchive = (_canvas, {
 } = {}) => {
 
     //収録データを取得する処理
-    debugLog("_canvas", _canvas);
-    debugLog("サムネイル用キャンバスに描画");
-    debugLog("getArchive");
-
     if (playingData !== null) {
         onReady(true);
-
         getNum(getNumPlayingData());
         if (thumbnail !== null) {
             getImage(thumbnail);
@@ -90,7 +46,7 @@ const initRec = ({
     onReady = () => { },
     onComplete = () => { },
 } = {}) => {
-    prepareRec({ onReady, onComplete });
+    initPlayingData({ onReady, onComplete });
 }
 
 
@@ -111,7 +67,7 @@ const stopRec = (_canvas, {
 }) => {
     stopRecording(_canvas, { onReady, onComplete });
     getRecTime(Date.now());
-    debugLog("stopRec");
+
 }
 
 const play = (_canvas, {
@@ -130,8 +86,6 @@ const stopPlaying = ({
 }) => {
     //再生停止する処理
     stopDataList({ onReady, onComplete });
-    debugLog("stopPlay");
-
 }
 
 const restartPlaying = ({
@@ -140,7 +94,7 @@ const restartPlaying = ({
 }) => {
     //再生停止する処理
     restartDataList({ onReady, onComplete });
-    debugLog("stopPlay");
+
 
 }
 
@@ -148,7 +102,6 @@ const deleteData = ({
     onReady = () => { },
     onComplete = () => { },
 }) => {
-    debugLog("deleteData");
     deletePlayingData({ onReady, onComplete });
 }
 
