@@ -411,13 +411,11 @@ const restartPlayingCallBack = {
     onComplete: (tf) => {
         if (tf == true) {
             //"UI通知-restartPlaying-再生位置リセット&再生停止が完了しました〇"
-            if (!isSaveDataPlay) { //再生中でないなら
-                getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
-            } else { //再生中なら
+            if (isSaveDataPlay) { //再生中なら
                 changeMovieBtnIcon(); //再生停止アイコン切替関数
                 isSaveDataPlay = false; //再生中フラグOFF
-                getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
             }
+            getArchive(CanvasRecMovie, getArchiveCallBack); //アーカイブチェック
         } else {
             //"UI通知-restartPlaying-再生位置リセット&再生停止が完了できませんでした×"
             window.alert("エラー");
