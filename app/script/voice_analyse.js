@@ -181,7 +181,7 @@ const startRecording = (_recordingCB) => {
         data.fsDivN = fsDivN;
 
         //再生用のインデックスをリセット
-        dataIndex = -1;
+        // dataIndex = -1;
 
         //受け取ったコールバックを外の変数に代入
         recordingCB = _recordingCB;
@@ -437,8 +437,8 @@ const createFrameDataObj = (bufferData, spectrums, timeDomainArray, audioDeltaTi
     visual.saturation = volumePeak / 255;
     visual.brightness = pitch;
     visual.objectCount = calcObjectCount(pitch, volume);
-    visual.objectShape = pitch;
-    visual.speed = pitch * 0;
+    visual.objectShape = sharpness;
+    visual.speed = pitch * 0.01;
 
     frameData.raw = raw;
     frameData.visual = visual;
@@ -610,7 +610,6 @@ const animateCanvases = (_canvas, _canvasPB, _callback) => {
             }
             //描画対象のデータのインデックスを決定する
             dataIndex = processIndex;
-            console.log(dataIndex);
             _callback.onProcess(true);
 
             otomieVisual_Play.updateSoundData(data["dataList"][dataIndex]["visual"]);
